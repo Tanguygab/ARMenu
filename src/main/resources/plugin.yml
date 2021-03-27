@@ -1,0 +1,11 @@
+name: ARMenu
+version: 1.0
+main: io.github.tanguygab.armenu.ARMenu
+api-version: 1.16
+depend: [ TAB ]
+softdepend: [ PlaceholderAPI ]
+authors: [ Tanguygab ]
+description: Another Random Menu plugin! Yeah, really...
+commands:
+  armenu:
+    permission: armenu.usage
