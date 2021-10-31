@@ -1,0 +1,48 @@
+title: "Title"
+
+commands:
+  - "example"
+  - "menu"
+
+open-commands:
+  - "tell: You opened this menu!"
+
+layout:
+  - '||||||||'
+  - '|      |'
+  - '|      |'
+  - '|      |'
+  - '|      |'
+  - '||||||||'
+
+items:
+  '|':
+    display:
+      name: ""
+      material: "GRAY_GLASS_PANE"
+
+  'A':
+    display:
+      name: "Arasple is a nice guy =)"
+      material: "APPLE"
+      lore:
+        - "You can't deny this fact"
+    actions:
+      all:
+        - "tell: You clicked me! Ouch, that hurts ;-;"
+        - "close"
+        - "player: say Hi, I'm %player%"
+        - "console: say Hi, I'm god"
+  'B':
+    display:
+      name: "Click Sensible"
+      material: "APPLE"
+      amount: 64
+      lore:
+        - "Left-click me"
+        - "and right-click me!"
+    actions:
+      left:
+        - "tell: You left-clicked me!"
+      right:
+        - "tell: And now you right-clicked me! And yes, that still hurts ;-;"
