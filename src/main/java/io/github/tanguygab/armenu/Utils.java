@@ -1,7 +1,7 @@
 package io.github.tanguygab.armenu;
 
+import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.shared.TAB;
@@ -10,7 +10,9 @@ import me.neznamy.tab.shared.placeholders.RelationalPlaceholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Utils {
 
@@ -61,6 +63,12 @@ public class Utils {
             newValue = newValue.replace("%value%", value);
 
         return newValue;
+    }
+
+    public static Map<Action,String> map(Object action) {
+        Map<Action,String> map = new HashMap<>();
+        map.put(Action.find(action+""),action+"");
+        return map;
     }
 
 }

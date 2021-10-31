@@ -1,6 +1,8 @@
 package io.github.tanguygab.armenu.menus.menu;
 
 import io.github.tanguygab.armenu.ARMenu;
+import me.neznamy.tab.api.PlaceholderManager;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
@@ -48,15 +50,16 @@ public class MenuManager extends TabFeature {
                 String name = file.getName().replace(".yml","");
                 menus.put(name,new Menu(name,cfg));
             }
+
+            PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
+            pm.registerServerPlaceholder("%armenu_menus_all%",999999900,()->menus.size()+"");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void unload() {
-
-    }
+    public void unload() {}
 
     @Override
     public void onJoin(TabPlayer p) {
@@ -84,7 +87,11 @@ public class MenuManager extends TabFeature {
             //Int2ObjectMap<ItemStack> menuitems = click.f(); keeping this to know what it is in case I need it x)
             return menu.clicked(slot,button,mode,item,p);
         }
-        if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66) {
+        if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66 && (menu = getMenu(p)) != null) {
+            if (!menu.onClose(p)) {
+                menu.openMenu(p);
+                return true;
+            }
             p.setProperty(this,"armenu",null);
         }
         return false;

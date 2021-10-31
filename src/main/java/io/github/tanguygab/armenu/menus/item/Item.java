@@ -118,24 +118,18 @@ public class Item {
                 if (click.getMode() != mode || click.getButton() != button) continue;
                 for (Object element : (List<Object>) actions.get(type)) {
                     if (element instanceof String el)
-                        list.add(map(el));
+                        list.add(Utils.map(el));
                     if (element instanceof Map<?,?> condmap) {
                         String cond = condmap.get("condition")+"";
                         Condition condition = Condition.getCondition(cond);
                         String section = (condition.isMet(p) ? "" : "deny-") + "actions";
                         if (!condmap.containsKey(section)) continue;
-                        ((List<String>)condmap.get(section)).forEach(str->list.add(map(str)));
+                        ((List<String>)condmap.get(section)).forEach(str->list.add(Utils.map(str)));
                     }
                 }
             }
         }
         return list;
-    }
-
-    private Map<Action,String> map(Object action) {
-        Map<Action,String> map = new HashMap<>();
-        map.put(Action.find(action+""),action+"");
-        return map;
     }
 
 }

@@ -1,10 +1,12 @@
 package io.github.tanguygab.armenu.menus.menu;
 
 import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.item.Item;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
+import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.game.PacketPlayOutOpenWindow;
@@ -43,6 +45,49 @@ public class Menu {
     public List<String> getLayout() {
         return layouts;
     }
+
+    public boolean onOpen(TabPlayer p) {
+        return onEvent(p,"open");
+    }
+
+    public boolean onClose(TabPlayer p) {
+        return onEvent(p,"close");
+    }
+
+    public boolean onEvent(TabPlayer p, String path) {
+        if (!config.hasConfigOption("events."+path)) return true;
+
+        List<Object> cfg = (List<Object>) config.getObject("events."+path);
+
+        List<Map<Action,String>> list = new ArrayList<>();
+        for (Object element : cfg) {
+            if (element instanceof String el)
+                list.add(Utils.map(el));
+            if (element instanceof Map<?,?> condmap) {
+                String cond = condmap.get("condition")+"";
+                Condition condition = Condition.getCondition(cond);
+                String section = (condition.isMet(p) ? "" : "deny-") + "actions";
+                if (!condmap.containsKey(section)) continue;
+                ((List<String>)condmap.get(section)).forEach(str->list.add(Utils.map(str)));
+            }
+        }
+
+        boolean canOpen = true;
+        for (Map<Action,String> map : list) {
+            for (Action ac : map.keySet()) {
+                String str = map.get(ac);
+                if (str.equalsIgnoreCase("return")) {
+                    canOpen = false;
+                    continue;
+                }
+                Action.execute(str,ac,p);
+            }
+        }
+
+
+        return canOpen;
+    }
+
     public List<Item> getItems() {
         return items;
     }
@@ -63,6 +108,8 @@ public class Menu {
     }
 
     public void openMenu(TabPlayer player) {
+        if (!onOpen(player)) return;
+
         PlayerConnection p = ((CraftPlayer)player.getPlayer()).getHandle().b;
 
         IChatBaseComponent title = IChatBaseComponent.a(titles.get(0));
