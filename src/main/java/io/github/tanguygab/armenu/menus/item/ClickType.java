@@ -8,7 +8,7 @@ public enum ClickType {
 
     LEFT_CLICK(InventoryClickType.a,0,-1,"left","left_click"),
     RIGHT_CLICK(InventoryClickType.a,1,-1,"right","right_click"),
-    LEFt_CLICK_OUT(InventoryClickType.a,2,-999,"left_out","right_click_out"),
+    LEFT_CLICK_OUT(InventoryClickType.a,2,-999,"left_out","right_click_out"),
     RIGHT_CLICK_OUT(InventoryClickType.a,3,-999,"right_out","right_click_out"),
 
     SHIFT_lEFT_CLICK(InventoryClickType.b,1,-1,"shift_left","shift_left_click"),
