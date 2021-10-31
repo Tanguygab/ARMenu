@@ -6,6 +6,8 @@ import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +47,8 @@ public abstract class Action {
                 new PlayerAction(),
                 new MessageAction()
         );
+        if (Bukkit.getServer().getPluginManager().isPluginEnabled("LuckPerms"))
+            Action.register(new PermissionAction());
     }
 
     public abstract Pattern getPattern();
@@ -55,6 +59,10 @@ public abstract class Action {
 
     public void runSync(Runnable r) {
         Bukkit.getServer().getScheduler().runTask(ARMenu.get(),r);
+    }
+
+    public <T> Future<T> runSyncFuture(Callable<T> c) {
+        return Bukkit.getServer().getScheduler().callSyncMethod(ARMenu.get(),c);
     }
 
 }
