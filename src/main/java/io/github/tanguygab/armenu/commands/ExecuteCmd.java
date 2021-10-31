@@ -1,8 +1,10 @@
 package io.github.tanguygab.armenu.commands;
 
+import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 public class ExecuteCmd {
@@ -29,6 +31,7 @@ public class ExecuteCmd {
             i++;
         }
 
-        Action.findAndExecute(action,p);
+        String finalAction = action;
+        Bukkit.getServer().getScheduler().runTaskAsynchronously(ARMenu.get(),()->Action.findAndExecute(finalAction,p));
     }
 }
