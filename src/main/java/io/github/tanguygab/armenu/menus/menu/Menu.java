@@ -14,9 +14,10 @@ public class Menu {
     private final String name;
     public final ConfigurationFile config;
 
-    public final List<String> titles = new ArrayList<>();
-    public final Map<String,Item> items = new HashMap<>();
+    private final List<String> commands = new ArrayList<>();
+    private final List<String> titles = new ArrayList<>();
     private final Map<String,Page> pages = new LinkedHashMap<>();
+    public final Map<String,Item> items = new HashMap<>();
 
     public Menu(String name, ConfigurationFile config) {
         this.name = name;
@@ -32,6 +33,12 @@ public class Menu {
     }
     public Map<String,Page> getPages() {
         return pages;
+    }
+    public List<String> getCommands() {
+        return commands;
+    }
+    public List<Item> getItems() {
+        return new ArrayList<>(items.values());
     }
 
     public boolean onOpen(TabPlayer p) {
@@ -76,9 +83,6 @@ public class Menu {
         return canOpen;
     }
 
-    public List<Item> getItems() {
-        return new ArrayList<>(items.values());
-    }
 
     public void createMenu() {
         if (config.hasConfigOption("title")) {
@@ -86,6 +90,13 @@ public class Menu {
             if (title instanceof List<?>)
                 titles.addAll((List<String>)title);
             else titles.add(title+"");
+        }
+        if (config.hasConfigOption("commands")) {
+            Object command = config.getObject("commands");
+            if (command instanceof String)
+                commands.add(command+"");
+            if (command instanceof List<?>)
+                commands.addAll((List<String>) command);
         }
         if (config.hasConfigOption("items")) {
             Map<String,Map<String, Object>> list = config.getConfigurationSection("items");

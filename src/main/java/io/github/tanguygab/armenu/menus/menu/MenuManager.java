@@ -87,6 +87,23 @@ public class MenuManager extends TabFeature {
     }
 
     @Override
+    public boolean onCommand(TabPlayer p, String message) {
+        String[] msg = message.split(" ");
+        for (Menu menu : menus.values()) {
+            if (menu.getCommands().contains(msg[0])) {
+                newMenuSession(p,menu);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void onQuit(TabPlayer p) {
+        sessions.remove(p);
+    }
+
+    @Override
     public boolean onPacketReceive(TabPlayer p, Object packet) {
         MenuSession session;
         if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && (session = sessions.get(p)) != null) {
@@ -101,6 +118,5 @@ public class MenuManager extends TabFeature {
             session.onClosePacket();
         }
         return false;
-
     }
 }
