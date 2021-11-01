@@ -3,6 +3,7 @@ package io.github.tanguygab.armenu.menus.item;
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
+import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import net.minecraft.world.inventory.InventoryClickType;
@@ -76,33 +77,39 @@ public class Item {
         return List.of();
     }
 
-    public net.minecraft.world.item.ItemStack getItem(int frame, TabPlayer p) {
+    public net.minecraft.world.item.ItemStack getItem(int frame, TabPlayer p, Page page, int slot) {
         if (materials.isEmpty())
             return net.minecraft.world.item.ItemStack.b;
 
-        String m = Utils.parsePlaceholders(materials.get(frame),p);
+        String m = placeholders(materials.get(frame),p,page,slot);
         Material m2 = Material.getMaterial(m);
         if (m2 == null) return net.minecraft.world.item.ItemStack.b;
         ItemStack item = new ItemStack(m2);
 
         if (!amounts.isEmpty()) {
-            String amount = Utils.parsePlaceholders(amounts.get(frame),p);
+            String amount = placeholders(amounts.get(frame),p,page,slot);
             try {
                 item.setAmount(Math.round(Float.parseFloat(amount)));
             } catch (Exception ignore) {}
         }
         ItemMeta meta = item.getItemMeta();
         if (!names.isEmpty())
-            meta.setDisplayName(Utils.parsePlaceholders(names.get(frame),p));
+            meta.setDisplayName(placeholders(names.get(frame),p,page,slot));
         if (!lores.isEmpty()) {
             List<String> lore = new ArrayList<>(lores.get(frame));
-            lore.forEach(l->lore.set(lore.indexOf(l),Utils.parsePlaceholders(l,p)));
+            lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot)));
             meta.setLore(lore);
         }
         item.setItemMeta(meta);
 
 
         return CraftItemStack.asNMSCopy(item);
+    }
+
+    private String placeholders(String text, TabPlayer p, Page page, int slot) {
+        return Utils.parsePlaceholders(text
+                .replace("%page%",page.getName())
+                .replace("%slot%",slot+""),p);
     }
 
     public List<Map<Action,String>> getClickActions(int slot, int button, InventoryClickType mode, net.minecraft.world.item.ItemStack item, TabPlayer p) {

@@ -1,25 +1,13 @@
 package io.github.tanguygab.armenu.menus.menu;
 
-import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.item.Item;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
-import net.minecraft.core.NonNullList;
-import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.network.protocol.game.PacketPlayOutOpenWindow;
-import net.minecraft.network.protocol.game.PacketPlayOutWindowItems;
-import net.minecraft.server.network.PlayerConnection;
-import net.minecraft.world.inventory.Containers;
-import net.minecraft.world.inventory.InventoryClickType;
-import net.minecraft.world.item.ItemStack;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Menu {
 
@@ -27,8 +15,8 @@ public class Menu {
     public final ConfigurationFile config;
 
     public final List<String> titles = new ArrayList<>();
-    public final List<String> layouts = new ArrayList<>();
-    public final List<Item> items = new ArrayList<>();
+    public final Map<String,Item> items = new HashMap<>();
+    private final Map<String,Page> pages = new LinkedHashMap<>();
 
     public Menu(String name, ConfigurationFile config) {
         this.name = name;
@@ -42,22 +30,22 @@ public class Menu {
     public List<String> getTitles() {
         return titles;
     }
-    public List<String> getLayout() {
-        return layouts;
+    public Map<String,Page> getPages() {
+        return pages;
     }
 
     public boolean onOpen(TabPlayer p) {
-        return onEvent(p,"open");
+        return onEvent(p,"events.open");
     }
 
     public boolean onClose(TabPlayer p) {
-        return onEvent(p,"close");
+        return onEvent(p,"events.close");
     }
 
     public boolean onEvent(TabPlayer p, String path) {
-        if (!config.hasConfigOption("events."+path)) return true;
+        if (!config.hasConfigOption(path)) return true;
 
-        List<Object> cfg = (List<Object>) config.getObject("events."+path);
+        List<Object> cfg = (List<Object>) config.getObject(path);
 
         List<Map<Action,String>> list = new ArrayList<>();
         for (Object element : cfg) {
@@ -89,7 +77,7 @@ public class Menu {
     }
 
     public List<Item> getItems() {
-        return items;
+        return new ArrayList<>(items.values());
     }
 
     public void createMenu() {
@@ -100,40 +88,14 @@ public class Menu {
             else titles.add(title+"");
         }
         if (config.hasConfigOption("items")) {
-            Map<String,Object> list = config.getConfigurationSection("items");
-            for (String item : list.keySet()) {
-                items.add(new Item(item, (Map<String, Object>) list.get(item)));
-            }
+            Map<String,Map<String, Object>> list = config.getConfigurationSection("items");
+            list.forEach((item,itemcfg)->items.put(item,new Item(item, itemcfg)));
+        }
+        if (config.hasConfigOption("pages")) {
+            Map<String, Map<String,Object>> pages = config.getConfigurationSection("pages");
+            pages.forEach((page,cfg)-> this.pages.put(page,new Page(page,this,cfg)));
+
         }
     }
 
-    public void openMenu(TabPlayer player) {
-        if (!onOpen(player)) return;
-
-        PlayerConnection p = ((CraftPlayer)player.getPlayer()).getHandle().b;
-
-        IChatBaseComponent title = IChatBaseComponent.a(titles.get(0));
-        PacketPlayOutOpenWindow open = new PacketPlayOutOpenWindow(66, Containers.f, title);
-        player.setProperty(ARMenu.get().getMenuManager(),"armenu",name);
-        p.sendPacket(open);
-
-        NonNullList<ItemStack> list = NonNullList.a();
-        items.forEach(item -> list.add(item.getItem(0,player)));
-        PacketPlayOutWindowItems windowitems = new PacketPlayOutWindowItems(66, 1, list ,ItemStack.b);
-
-        p.sendPacket(windowitems);
-    }
-
-    public Item getItemAtSlot(int slot) {
-        return items.get(slot);
-    }
-
-    public boolean clicked(int slot, int button, InventoryClickType mode, ItemStack item, TabPlayer p) {
-        items.forEach(i-> {
-            if (getItemAtSlot(slot) == i)
-                i.getClickActions(slot,button,mode,item,p).forEach(map->map.forEach((ac,str)->Action.execute(str,ac,p)));
-
-        });
-        return true;
-    }
 }

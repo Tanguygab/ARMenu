@@ -3,10 +3,10 @@ package io.github.tanguygab.armenu.menus.menu;
 import io.github.tanguygab.armenu.ARMenu;
 import me.neznamy.tab.api.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
-import me.neznamy.tab.api.TabFeature;
 import net.minecraft.network.protocol.game.PacketPlayInCloseWindow;
 import net.minecraft.network.protocol.game.PacketPlayInWindowClick;
 import net.minecraft.world.inventory.InventoryClickType;
@@ -15,12 +15,16 @@ import net.minecraft.world.item.ItemStack;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MenuManager extends TabFeature {
 
     public ConfigurationFile config;
-    public Map<String,Menu> menus = new HashMap<>();
+    public Map<String, Menu> menus = new HashMap<>();
+    public Map<TabPlayer, MenuSession> sessions = new HashMap<>();
 
     public MenuManager() {
         super("&2ARMenu&r");
@@ -67,7 +71,13 @@ public class MenuManager extends TabFeature {
         if (m.equalsIgnoreCase("")) return;
         Menu menu = menus.get(m);
         if (menu == null) return;
-        menu.openMenu(p);
+        newMenuSession(p,menu);
+    }
+
+    public void newMenuSession(TabPlayer p, Menu menu) {
+        MenuSession session = new MenuSession(p,menu);
+        ARMenu.get().getMenuManager().sessions.put(p,session);
+        session.openMenu();
     }
 
     public Menu getMenu(TabPlayer p) {
@@ -78,21 +88,17 @@ public class MenuManager extends TabFeature {
 
     @Override
     public boolean onPacketReceive(TabPlayer p, Object packet) {
-        Menu menu;
-        if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && (menu = getMenu(p)) != null) {
+        MenuSession session;
+        if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && (session = sessions.get(p)) != null) {
             int slot = click.c();
             int button = click.d();
             InventoryClickType mode = click.g();
             ItemStack item = click.e();
             //Int2ObjectMap<ItemStack> menuitems = click.f(); keeping this to know what it is in case I need it x)
-            return menu.clicked(slot,button,mode,item,p);
+            return session.onClickPacket(slot,button,mode,item);
         }
-        if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66 && (menu = getMenu(p)) != null) {
-            if (!menu.onClose(p)) {
-                menu.openMenu(p);
-                return true;
-            }
-            p.setProperty(this,"armenu",null);
+        if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66 && (session = sessions.get(p)) != null) {
+            session.onClosePacket();
         }
         return false;
 

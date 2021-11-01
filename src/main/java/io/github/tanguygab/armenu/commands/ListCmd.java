@@ -2,7 +2,6 @@ package io.github.tanguygab.armenu.commands;
 
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
-import io.github.tanguygab.armenu.menus.menu.MenuManager;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
