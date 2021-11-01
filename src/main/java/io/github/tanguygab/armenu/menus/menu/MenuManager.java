@@ -90,7 +90,7 @@ public class MenuManager extends TabFeature {
     public boolean onCommand(TabPlayer p, String message) {
         String[] msg = message.split(" ");
         for (Menu menu : menus.values()) {
-            if (menu.getCommands().contains(msg[0])) {
+            if (menu.getCommands().contains(msg[0].substring(1))) {
                 newMenuSession(p,menu);
                 return true;
             }
