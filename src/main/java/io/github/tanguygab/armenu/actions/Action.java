@@ -1,6 +1,9 @@
 package io.github.tanguygab.armenu.actions;
 
 import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.actions.commands.ConsoleAction;
+import io.github.tanguygab.armenu.actions.commands.PermissionAction;
+import io.github.tanguygab.armenu.actions.commands.PlayerAction;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.Bukkit;
 

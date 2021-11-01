@@ -1,6 +1,7 @@
-package io.github.tanguygab.armenu.actions;
+package io.github.tanguygab.armenu.actions.commands;
 
 import io.github.tanguygab.armenu.Utils;
+import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.Bukkit;
 

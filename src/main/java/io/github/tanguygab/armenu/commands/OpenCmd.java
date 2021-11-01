@@ -1,5 +1,6 @@
-package io.github.tanguygab.armenu;
+package io.github.tanguygab.armenu.commands;
 
+import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.menus.menu.Menu;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
@@ -27,6 +28,6 @@ public class OpenCmd {
                 return;
             }
         }
-        menu.openMenu(p);
+        ARMenu.get().getMenuManager().newMenuSession(p,menu);
     }
 }
