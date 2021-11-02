@@ -14,6 +14,7 @@ public class Menu {
     private final String name;
     public final ConfigurationFile config;
 
+    private InventoryType type = null;
     private final List<String> commands = new ArrayList<>();
     private final List<String> titles = new ArrayList<>();
     private final Map<String,Page> pages = new LinkedHashMap<>();
@@ -37,6 +38,10 @@ public class Menu {
     public List<String> getCommands() {
         return commands;
     }
+    public InventoryType getType() {
+        return type;
+    }
+
     public List<Item> getItems() {
         return new ArrayList<>(items.values());
     }
@@ -85,6 +90,8 @@ public class Menu {
 
 
     public void createMenu() {
+        if (config.hasConfigOption("type"))
+            type = InventoryType.get(config.getString("type"));
         if (config.hasConfigOption("title")) {
             Object title = config.getObject("title");
             if (title instanceof List<?>)
@@ -108,5 +115,4 @@ public class Menu {
 
         }
     }
-
 }

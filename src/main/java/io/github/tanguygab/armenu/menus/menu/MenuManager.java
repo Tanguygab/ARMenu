@@ -106,13 +106,13 @@ public class MenuManager extends TabFeature {
     @Override
     public boolean onPacketReceive(TabPlayer p, Object packet) {
         MenuSession session;
-        if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && (session = sessions.get(p)) != null) {
+        if (packet instanceof PacketPlayInWindowClick click && (click.b() == 66) && (session = sessions.get(p)) != null) {
             int slot = click.c();
             int button = click.d();
             InventoryClickType mode = click.g();
-            ItemStack item = click.e();
+            //ItemStack item = click.e();
             //Int2ObjectMap<ItemStack> menuitems = click.f(); keeping this to know what it is in case I need it x)
-            return session.onClickPacket(slot,button,mode,item);
+            return session.onClickPacket(slot,button,mode);
         }
         if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66 && (session = sessions.get(p)) != null) {
             session.onClosePacket();
