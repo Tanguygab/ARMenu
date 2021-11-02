@@ -115,6 +115,8 @@ public class Item {
     public List<Map<Action,String>> getClickActions(int slot, int button, InventoryClickType mode, net.minecraft.world.item.ItemStack item, TabPlayer p) {
         List<Map<Action,String>> list = new ArrayList<>();
         Map<String,Object> actions = (Map<String, Object>) config.get("actions");
+        if (actions == null) return list;
+
         for (String type : actions.keySet()) {
             for (String type2 : type.split(",")) {
                 ClickType click = ClickType.get(type2);

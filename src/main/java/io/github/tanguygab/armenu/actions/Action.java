@@ -52,7 +52,8 @@ public abstract class Action {
                 new PlayerAction(),
                 new MessageAction(),
                 new SetPageAction(),
-                new UpdatePageAction()
+                new UpdatePageAction(),
+                new RefreshAction()
         );
         if (Bukkit.getServer().getPluginManager().isPluginEnabled("LuckPerms"))
             Action.register(new PermissionAction());
