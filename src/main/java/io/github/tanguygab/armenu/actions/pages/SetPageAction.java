@@ -11,9 +11,11 @@ import java.util.regex.Pattern;
 
 public class SetPageAction extends Action {
 
+    private final Pattern pattern = Pattern.compile("(?i)set-page:( )?");
+
     @Override
     public Pattern getPattern() {
-        return Pattern.compile("(?i)set-page:( )?");
+        return pattern;
     }
 
     @Override

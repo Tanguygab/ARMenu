@@ -17,9 +17,11 @@ import java.util.regex.Pattern;
 
 public class PermissionAction extends Action {
 
+    private final Pattern pattern = Pattern.compile("(?i)(perm|permission):(?<permission>[a-zA-Z0-9.*_\\- \",]+):( )?");
+
     @Override
     public Pattern getPattern() {
-        return Pattern.compile("(?i)(perm|permission):(?<permission>[a-zA-Z0-9.*_\\- \",]+):( )?");
+        return pattern;
     }
 
     @Override
@@ -31,12 +33,14 @@ public class PermissionAction extends Action {
     public void execute(String match, TabPlayer p) {
         if (p == null) return;
         Matcher matcher = getPattern().matcher(match);
+        //noinspection ResultOfMethodCallIgnored
         matcher.find();
         String[] permission = matcher.group("permission").split(",");
         match = match.replaceAll(matcher.pattern().pattern(),"");
 
         UserManager um = LuckPermsProvider.get().getUserManager();
         User user = um.getUser(p.getUniqueId());
+        if (user == null) return;
         List<Node> nodes = new ArrayList<>();
         for (String perm : permission) {
             if (user.getCachedData().getPermissionData().checkPermission(perm).asBoolean()) continue;

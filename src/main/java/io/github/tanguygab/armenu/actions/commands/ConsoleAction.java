@@ -9,11 +9,12 @@ import java.util.regex.Pattern;
 
 public class ConsoleAction extends Action {
 
+    private final Pattern pattern = Pattern.compile("(?i)console:( )?");
+
     @Override
     public Pattern getPattern() {
-        return Pattern.compile("(?i)console:( )?");
+        return pattern;
     }
-
 
     @Override
     public boolean replaceMatch() {

@@ -9,9 +9,11 @@ import java.util.regex.Pattern;
 
 public class MessageAction extends Action {
 
+    private final Pattern pattern = Pattern.compile("(?i)(message|msg|tell):( )?");
+
     @Override
     public Pattern getPattern() {
-        return Pattern.compile("(?i)(message|msg|tell):( )?");
+        return pattern;
     }
 
     @Override

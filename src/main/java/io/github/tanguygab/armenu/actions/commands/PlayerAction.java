@@ -11,9 +11,11 @@ import java.util.regex.Pattern;
 
 public class PlayerAction extends Action {
 
+    private final Pattern pattern = Pattern.compile("(?i)(player|cmd|command):( )?");
+
     @Override
     public Pattern getPattern() {
-        return Pattern.compile("(?i)(player|cmd|command):( )?");
+        return pattern;
     }
 
     @Override

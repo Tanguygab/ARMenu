@@ -10,9 +10,11 @@ import java.util.regex.Pattern;
 
 public class UpdatePageAction extends Action {
 
+    private final Pattern pattern = Pattern.compile("(?i)update-page:( )?");
+
     @Override
     public Pattern getPattern() {
-        return Pattern.compile("(?i)update-page:( )?");
+        return pattern;
     }
 
     @Override
@@ -26,6 +28,6 @@ public class UpdatePageAction extends Action {
         if (p == null || (session = ARMenu.get().getMenuManager().sessions.get(p)) == null) return;
         match = Utils.parsePlaceholders(match,p);
         try {session.updatePage(Integer.parseInt(match));}
-        catch (Exception ignored) {ignored.printStackTrace();}
+        catch (Exception ignored) {}
     }
 }

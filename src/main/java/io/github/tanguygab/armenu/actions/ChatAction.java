@@ -8,9 +8,11 @@ import java.util.regex.Pattern;
 
 public class ChatAction extends Action {
 
+    private final Pattern pattern = Pattern.compile("(?i)chat:( )?");
+
     @Override
     public Pattern getPattern() {
-        return Pattern.compile("(?i)chat:( )?");
+        return pattern;
     }
 
     @Override
