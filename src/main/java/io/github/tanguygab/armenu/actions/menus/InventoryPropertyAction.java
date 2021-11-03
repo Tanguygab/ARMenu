@@ -7,11 +7,12 @@ import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
 import io.github.tanguygab.armenu.menus.menu.MenuSession;
 import me.neznamy.tab.api.TabPlayer;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class InventoryPropertyAction extends Action {
 
-    private final Pattern pattern = Pattern.compile("(i?)set-inv(entory)?-prop(erty)?:");
+    private final Pattern pattern = Pattern.compile("(i?)set-inv(entory)?-prop(erty)?:( )?");
 
     @Override
     public Pattern getPattern() {

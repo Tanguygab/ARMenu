@@ -67,7 +67,7 @@ public class MenuSession {
 
     public void sendPackets(boolean refresh) {
         List<Packet<PacketListenerPlayOut>> packets = refresh ? getInventoryPackets() : lastSentPacket;
-        packets.forEach(packet->p.sendPacket(packet,ARMenu.get().getMenuManager()));
+        packets.forEach(packet-> p.sendPacket(packet,ARMenu.get().getMenuManager()));
         lastSentPacket = packets;
     }
 
@@ -90,8 +90,7 @@ public class MenuSession {
     public void setInventoryProperty(InventoryProperty prop, int value) {
         PacketPlayOutWindowData packet = new PacketPlayOutWindowData(66,prop.getProperty(),value);
         customInventoryProperties.add(packet);
-        p.sendPacket(packet);
-
+        p.sendPacket(packet,ARMenu.get().getMenuManager());
     }
 
     public List<Packet<PacketListenerPlayOut>> getInventoryPackets() {
@@ -133,12 +132,12 @@ public class MenuSession {
     }
 
     public boolean onClickPacket(int slot, int button, InventoryClickType mode) {
+        sendPackets(false);
         menu.getItems().forEach(i-> {
             if (page.getItemAtSlot(slot) == i)
                 i.getClickActions(button,mode,p).forEach(map->map.forEach((ac,str)-> Action.execute(str,ac,p)));
         });
 
-        sendPackets(false);
         return true;
     }
 
