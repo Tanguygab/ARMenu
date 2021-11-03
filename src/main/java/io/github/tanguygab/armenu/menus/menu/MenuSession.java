@@ -104,8 +104,12 @@ public class MenuSession {
 
         list.addAll(page.getSetSlots(p, frame));
         list.addAll(getInventoryProperties());
-        pageItems.addAll(page.getPlayerInvItems(p,frame));
-        list.add(new PacketPlayOutWindowItems(66, 1, pageItems ,ItemStack.b));
+        NonNullList<ItemStack> pInvItems = NonNullList.a();
+        while (pInvItems.size() < 9) pInvItems.add(ItemStack.b);
+        pInvItems.addAll(page.getPlayerInvItems(p,frame));
+        if (pInvItems.size() > 9)
+            list.add(new PacketPlayOutWindowItems(0, 1, pInvItems, ItemStack.b));
+        list.add(new PacketPlayOutWindowItems(66, 1, pageItems, ItemStack.b));
 
 
         IChatBaseComponent title = IChatBaseComponent.a(menu.getTitles().get(frame));

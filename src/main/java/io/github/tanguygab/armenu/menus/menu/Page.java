@@ -77,9 +77,7 @@ public class Page {
     public NonNullList<ItemStack> getPlayerInvItems(TabPlayer p, int frame) {
         NonNullList<ItemStack> list = NonNullList.a();
         if (playerInvItems == null) {
-            org.bukkit.inventory.ItemStack[] stacks = ((Player)p.getPlayer()).getInventory().getStorageContents();
-            for (org.bukkit.inventory.ItemStack stack : stacks)
-                list.add(CraftItemStack.asNMSCopy(stack));
+
             return list;
         }
         int slot = 0;
