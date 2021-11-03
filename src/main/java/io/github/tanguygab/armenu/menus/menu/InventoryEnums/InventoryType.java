@@ -1,4 +1,4 @@
-package io.github.tanguygab.armenu.menus.menu;
+package io.github.tanguygab.armenu.menus.menu.InventoryEnums;
 
 import net.minecraft.world.inventory.Containers;
 import java.util.List;
@@ -39,7 +39,7 @@ public enum InventoryType {
     }
 
     public static InventoryType get(String name) {
-        name = name.replace(" ", "_");
+        name = name.toLowerCase().replace(" ","_");
         for (InventoryType type : values()) {
             if (type.name.contains(name))
                 return type;

@@ -8,9 +8,10 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import net.minecraft.network.protocol.game.PacketPlayInCloseWindow;
+import net.minecraft.network.protocol.game.PacketPlayInEnchantItem;
 import net.minecraft.network.protocol.game.PacketPlayInWindowClick;
 import net.minecraft.world.inventory.InventoryClickType;
-import net.minecraft.world.item.ItemStack;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,7 +107,7 @@ public class MenuManager extends TabFeature {
     @Override
     public boolean onPacketReceive(TabPlayer p, Object packet) {
         MenuSession session;
-        if (packet instanceof PacketPlayInWindowClick click && (click.b() == 66) && (session = sessions.get(p)) != null) {
+        if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && (session = sessions.get(p)) != null) {
             int slot = click.c();
             int button = click.d();
             InventoryClickType mode = click.g();
@@ -114,8 +115,14 @@ public class MenuManager extends TabFeature {
             //Int2ObjectMap<ItemStack> menuitems = click.f(); keeping this to know what it is in case I need it x)
             return session.onClickPacket(slot,button,mode);
         }
+        if (packet instanceof PacketPlayInEnchantItem click && click.b() == 66 && (session = sessions.get(p)) != null) {
+            int buttonId = click.c();
+            session.onMenuButton(buttonId);
+            return true;
+        }
         if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66 && (session = sessions.get(p)) != null) {
             session.onClosePacket();
+            ((Player)p.getPlayer()).updateInventory();
         }
         return false;
     }

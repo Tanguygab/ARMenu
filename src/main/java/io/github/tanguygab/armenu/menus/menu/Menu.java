@@ -3,6 +3,8 @@ package io.github.tanguygab.armenu.menus.menu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.item.Item;
+import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
+import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryType;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
@@ -15,6 +17,7 @@ public class Menu {
     public final ConfigurationFile config;
 
     private InventoryType type = null;
+    private final Map<InventoryProperty,Object> properties = new HashMap<>();
     private final List<String> commands = new ArrayList<>();
     private final List<String> titles = new ArrayList<>();
     private final Map<String,Page> pages = new LinkedHashMap<>();
@@ -40,6 +43,9 @@ public class Menu {
     }
     public InventoryType getType() {
         return type;
+    }
+    public Map<InventoryProperty,Object> getInventoryProperties() {
+        return properties;
     }
 
     public List<Item> getItems() {
@@ -92,27 +98,35 @@ public class Menu {
     public void createMenu() {
         if (config.hasConfigOption("type"))
             type = InventoryType.get(config.getString("type"));
+        if (config.hasConfigOption("menu-properties")) {
+            Map<String,Object> props = config.getConfigurationSection("menu-properties");
+            props.forEach((prop,value) -> {
+                InventoryProperty property = InventoryProperty.get(prop);
+                if (property != null)
+                    properties.put(property,value);
+            });
+        }
         if (config.hasConfigOption("title")) {
             Object title = config.getObject("title");
             if (title instanceof List<?>)
-                titles.addAll((List<String>)title);
-            else titles.add(title+"");
+                titles.addAll((List<String>) title);
+            else titles.add(title + "");
         }
         if (config.hasConfigOption("commands")) {
             Object command = config.getObject("commands");
             if (command instanceof String)
-                commands.add(command+"");
+                commands.add(command + "");
             if (command instanceof List<?>)
                 commands.addAll((List<String>) command);
         }
         if (config.hasConfigOption("items")) {
-            Map<String,Map<String, Object>> list = config.getConfigurationSection("items");
-            list.forEach((item,itemcfg)->items.put(item,new Item(item, itemcfg)));
+            Map<String, Map<String, Object>> list = config.getConfigurationSection("items");
+            list.forEach((item, itemcfg) -> items.put(item, new Item(item, itemcfg)));
         }
         if (config.hasConfigOption("pages")) {
-            Map<String, Map<String,Object>> pages = config.getConfigurationSection("pages");
-            pages.forEach((page,cfg)-> this.pages.put(page,new Page(page,this,cfg)));
-
-        }
+            Map<String, Map<String, Object>> pages = config.getConfigurationSection("pages");
+            pages.forEach((page, cfg) -> this.pages.put(page, new Page(page, this, cfg)));
+        } else
+            pages.put("0", new Page("0",this,new HashMap<>()));
     }
 }

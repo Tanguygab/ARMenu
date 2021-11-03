@@ -1,6 +1,7 @@
-package io.github.tanguygab.armenu.actions;
+package io.github.tanguygab.armenu.actions.menus;
 
 import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.MenuSession;
 import me.neznamy.tab.api.TabPlayer;
 

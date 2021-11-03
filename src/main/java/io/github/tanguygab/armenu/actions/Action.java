@@ -4,6 +4,8 @@ import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.actions.commands.ConsoleAction;
 import io.github.tanguygab.armenu.actions.commands.PermissionAction;
 import io.github.tanguygab.armenu.actions.commands.PlayerAction;
+import io.github.tanguygab.armenu.actions.menus.InventoryPropertyAction;
+import io.github.tanguygab.armenu.actions.menus.RefreshAction;
 import io.github.tanguygab.armenu.actions.pages.SetPageAction;
 import io.github.tanguygab.armenu.actions.pages.UpdatePageAction;
 import me.neznamy.tab.api.TabPlayer;
@@ -53,7 +55,8 @@ public abstract class Action {
                 new MessageAction(),
                 new SetPageAction(),
                 new UpdatePageAction(),
-                new RefreshAction()
+                new RefreshAction(),
+                new InventoryPropertyAction()
         );
         if (Bukkit.getServer().getPluginManager().isPluginEnabled("LuckPerms"))
             Action.register(new PermissionAction());

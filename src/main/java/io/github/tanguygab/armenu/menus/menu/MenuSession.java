@@ -1,13 +1,18 @@
 package io.github.tanguygab.armenu.menus.menu;
 
 import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
+import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryButton;
+import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
+import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryType;
 import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.PacketListenerPlayOut;
 import net.minecraft.network.protocol.game.PacketPlayOutOpenWindow;
+import net.minecraft.network.protocol.game.PacketPlayOutWindowData;
 import net.minecraft.network.protocol.game.PacketPlayOutWindowItems;
 import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
@@ -21,8 +26,10 @@ public class MenuSession {
     private final TabPlayer p;
     private final Menu menu;
 
-    public Page page;
-    public List<Packet<PacketListenerPlayOut>> lastSentPacket = null;
+    private Page page;
+    private List<Packet<PacketListenerPlayOut>> lastSentPacket = null;
+
+    private final List<PacketPlayOutWindowData> customInventoryProperties = new ArrayList<>();
 
     public MenuSession(TabPlayer p, Menu menu) {
         this.p = p;
@@ -58,17 +65,17 @@ public class MenuSession {
             sendPackets(true);
     }
 
+    public void sendPackets(boolean refresh) {
+        List<Packet<PacketListenerPlayOut>> packets = refresh ? getInventoryPackets() : lastSentPacket;
+        packets.forEach(packet->p.sendPacket(packet,ARMenu.get().getMenuManager()));
+        lastSentPacket = packets;
+    }
+
     public void setPage(Page page) {
         if (this.page == page) return;
         this.page.onClose(p);
         this.page = page;
         sendPackets(true);
-    }
-
-    public void sendPackets(boolean refresh) {
-        List<Packet<PacketListenerPlayOut>> packets = refresh ? getInventoryPackets() : lastSentPacket;
-        packets.forEach(packet->p.sendPacket(packet,ARMenu.get().getMenuManager()));
-        lastSentPacket = packets;
     }
 
     public void updatePage(int i) {
@@ -80,21 +87,44 @@ public class MenuSession {
         else setPage(pages.get(i));
     }
 
+    public void setInventoryProperty(InventoryProperty prop, int value) {
+        PacketPlayOutWindowData packet = new PacketPlayOutWindowData(66,prop.getProperty(),value);
+        customInventoryProperties.add(packet);
+        p.sendPacket(packet);
+
+    }
+
     public List<Packet<PacketListenerPlayOut>> getInventoryPackets() {
-        int frame = 0;
         List<Packet<PacketListenerPlayOut>> list = new ArrayList<>();
+        int frame = 0;
         page.onOpen(p);
         NonNullList<ItemStack> pageItems = page.getItems(p,frame);
-        list.add(new PacketPlayOutWindowItems(66, 1, pageItems ,ItemStack.b));
-        list.add(new PacketPlayOutWindowItems(0, 1, page.getPlayerInvItems(p,frame) ,ItemStack.b));
-        IChatBaseComponent title = IChatBaseComponent.a(menu.getTitles().get(frame));
-
         InventoryType type = menu.getType() != null ? menu.getType() : InventoryType.get(""+pageItems.size());
         if (type == null) type = InventoryType.NORMAL_54;
 
+        list.addAll(page.getSetSlots(p, frame));
+        list.addAll(getInventoryProperties());
+        pageItems.addAll(page.getPlayerInvItems(p,frame));
+        list.add(new PacketPlayOutWindowItems(66, 1, pageItems ,ItemStack.b));
+
+
+        IChatBaseComponent title = IChatBaseComponent.a(menu.getTitles().get(frame));
         PacketPlayOutOpenWindow open = new PacketPlayOutOpenWindow(66, type.container, title);
         list.add(open);
         Collections.reverse(list);
+        return list;
+    }
+
+    public List<PacketPlayOutWindowData> getInventoryProperties() {
+        List<PacketPlayOutWindowData> list = new ArrayList<>();
+        menu.getInventoryProperties().forEach((property,value)-> {
+            String val = Utils.parsePlaceholders(value+"",p);
+            try {
+                list.add(new PacketPlayOutWindowData(66, property.getProperty(), Integer.parseInt(val)));
+            } catch (Exception ignored) {}
+        });
+        if (!customInventoryProperties.isEmpty())
+            list.addAll(customInventoryProperties);
         return list;
     }
 
@@ -106,5 +136,11 @@ public class MenuSession {
 
         sendPackets(false);
         return true;
+    }
+
+    public void onMenuButton(int buttonId) {
+        InventoryButton button = InventoryButton.get(menu.getType(),buttonId);
+        if (button == null) return;
+
     }
 }

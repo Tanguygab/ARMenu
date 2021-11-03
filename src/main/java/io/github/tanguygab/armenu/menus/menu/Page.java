@@ -1,8 +1,10 @@
 package io.github.tanguygab.armenu.menus.menu;
 
+import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.menus.item.Item;
 import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.protocol.game.PacketPlayOutSetSlot;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -16,22 +18,28 @@ public class Page {
     private final String name;
     private final Menu menu;
     private final Map<String,Object> config;
-    private final List<Item> items;
+    private final List<Item> items = new ArrayList<>();
     private final List<Item> playerInvItems;
+    private final List<Item> setslots = new ArrayList<>();
 
     public Page(String name, Menu menu, Map<String,Object> config) {
         this.name = name;
         this.menu = menu;
         this.config = config;
 
-        items = new ArrayList<>();
         createItems("menu-layout",items);
         if ((config.containsKey("player-layout") && ((List<String>)config.get("player-layout")).isEmpty()))
             playerInvItems = null;
         else {
             playerInvItems = new ArrayList<>();
             createItems("player-layout",playerInvItems);
+            while (playerInvItems.size() < 36) playerInvItems.add(null);
         }
+
+        menu.getItems().forEach(item -> {
+            if (!item.getSlots(this).isEmpty())
+                setslots.add(item);
+        });
     }
 
     private void createItems(String path, List<Item> items) {
@@ -83,9 +91,29 @@ public class Page {
         return list;
     }
 
+    public List<PacketPlayOutSetSlot> getSetSlots(TabPlayer p, int frame) {
+        List<PacketPlayOutSetSlot> packets = new ArrayList<>();
+
+        setslots.forEach(item->{
+            item.getSlots(this).forEach(list->{
+                String slot = list.get(frame);
+                if (slot == null) return;
+                slot = Utils.parsePlaceholders(slot,p);
+                try {
+                    int i = Integer.parseInt(slot);
+                    packets.add(new PacketPlayOutSetSlot(66,0,i,item.getItem(frame, p, this, i)));
+                } catch (Exception ignored) {}
+
+            });
+        });
+
+        return packets;
+    }
+
     public Item getItemAtSlot(int slot) {
         if (slot == -999) return null;
         if (slot > items.size()) {
+            slot = slot-items.size();
             if (playerInvItems == null || playerInvItems.size() <= slot) return null;
             return playerInvItems.get(slot);
         }

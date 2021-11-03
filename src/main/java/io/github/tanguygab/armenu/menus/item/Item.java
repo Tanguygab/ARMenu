@@ -19,10 +19,11 @@ public class Item {
     public final String name;
     public final Map<String,Object> config;
 
-    public List<String> names;
-    public List<String> amounts;
-    public List<String> materials;
-    public List<List<String>> lores;
+    private final List<String> names;
+    private final List<String> amounts;
+    private final List<String> materials;
+    private final List<List<String>> lores;
+    private final Map<String,List<List<String>>> slots;
 
     public Item(String name, Map<String,Object> config) {
         this.name = name;
@@ -32,13 +33,23 @@ public class Item {
         amounts = getAmounts();
         materials = getMaterials();
         lores = getLores();
+        slots = getSlots();
     }
 
     public String getConfigName() {
         return name;
     }
 
-    public List<String> getNames() {
+    public List<List<String>> getSlots(Page page) {
+        List<List<String>> list = new ArrayList<>();
+        if (slots.containsKey(page.getName()))
+            list.addAll(slots.get(page.getName()));
+        if (slots.containsKey("__ALL__"))
+            list.addAll(slots.get("__ALL__"));
+        return list;
+    }
+
+    private List<String> getNames() {
         Object name = config.get("name");
         if (name == null) return List.of();
 
@@ -47,7 +58,7 @@ public class Item {
         return (List<String>) name;
     }
 
-    public List<String> getAmounts() {
+    private List<String> getAmounts() {
         Object amount = config.get("amount");
         if (amount == null) return List.of();
 
@@ -57,29 +68,56 @@ public class Item {
         ((List<?>)amount).forEach(i->list.add(i+""));
         return list;
     }
-
-    public List<String> getMaterials() {
+    private List<String> getMaterials() {
         Object mat = config.get("material");
         if (mat == null) return List.of();
-
 
         if (mat instanceof String)
             return List.of(mat+"");
         return (List<String>) mat;
     }
-    public List<List<String>> getLores() {
+
+    private List<List<String>> getLores() {
         if (config.containsKey("lore")) {
             List<?> lore = (List<?>) config.get("lore");
             if (lore.isEmpty()) return List.of(List.of());
             if (lore.get(0) instanceof List<?>) return (List<List<String>>) lore;
             else return List.of((List<String>)lore);
         }
-        return List.of();
+        return List.of(List.of());
+    }
+
+    private Map<String,List<List<String>>> getSlots() {
+        Map<String,List<List<String>>> map = new HashMap<>();
+
+        if (!config.containsKey("slot")) {
+            return map;
+        };
+
+        Object opt = config.get("slot");
+        if (opt instanceof String || opt instanceof Integer) {
+            map.put("__ALL__",List.of(List.of(opt+"")));
+            return map;
+        }
+        Map<String,Object> slots = (Map<String, Object>) opt;
+        if (slots.isEmpty()) return map;
+
+        slots.forEach((page,slot)->{
+            List<List<String>> list = new ArrayList<>();
+            ((List<?>)slot).forEach(s -> {
+                if (s instanceof List<?>)
+                    list.add((List<String>) s);
+                else list.add(List.of(s+""));
+            });
+
+            map.put(page,list);
+        });
+
+        return map;
     }
 
     public net.minecraft.world.item.ItemStack getItem(int frame, TabPlayer p, Page page, int slot) {
-        if (materials.isEmpty())
-            return net.minecraft.world.item.ItemStack.b;
+        if (materials.isEmpty()) return net.minecraft.world.item.ItemStack.b;
 
         String m = placeholders(materials.get(frame),p,page,slot);
         Material m2 = Material.getMaterial(m);
@@ -88,9 +126,8 @@ public class Item {
 
         if (!amounts.isEmpty()) {
             String amount = placeholders(amounts.get(frame),p,page,slot);
-            try {
-                item.setAmount(Math.round(Float.parseFloat(amount)));
-            } catch (Exception ignore) {}
+            try {item.setAmount(Math.round(Float.parseFloat(amount)));}
+            catch (Exception ignored) {}
         }
         ItemMeta meta = item.getItemMeta();
         if (!names.isEmpty())

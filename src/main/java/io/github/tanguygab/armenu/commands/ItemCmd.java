@@ -1,7 +1,7 @@
 package io.github.tanguygab.armenu.commands;
 
 import io.github.tanguygab.armenu.ARMenu;
-import io.github.tanguygab.armenu.item.ItemStorage;
+import io.github.tanguygab.armenu.itemstorage.ItemStorage;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import net.minecraft.nbt.NBTTagCompound;

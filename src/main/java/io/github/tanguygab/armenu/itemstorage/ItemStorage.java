@@ -1,4 +1,4 @@
-package io.github.tanguygab.armenu.item;
+package io.github.tanguygab.armenu.itemstorage;
 
 import io.github.tanguygab.armenu.ARMenu;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
