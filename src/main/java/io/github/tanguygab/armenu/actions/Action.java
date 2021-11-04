@@ -4,11 +4,8 @@ import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.actions.commands.ConsoleAction;
 import io.github.tanguygab.armenu.actions.commands.PermissionAction;
 import io.github.tanguygab.armenu.actions.commands.PlayerAction;
-import io.github.tanguygab.armenu.actions.menus.InventoryPropertyAction;
-import io.github.tanguygab.armenu.actions.menus.RefreshAction;
+import io.github.tanguygab.armenu.actions.menus.*;
 import io.github.tanguygab.armenu.actions.messages.*;
-import io.github.tanguygab.armenu.actions.menus.SetPageAction;
-import io.github.tanguygab.armenu.actions.menus.UpdatePageAction;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.Bukkit;
 
@@ -58,7 +55,9 @@ public abstract class Action {
                 new InventoryPropertyAction(),
                 new RefreshAction(),
                 new SetPageAction(),
+                new SetListAction(),
                 new UpdatePageAction(),
+                new UpdateListAction(),
 
                 new ActionBarAction(),
                 new BroadcastAction(),

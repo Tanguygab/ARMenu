@@ -149,7 +149,7 @@ public class Item {
                 .replace("%slot%",slot+""),p);
     }
 
-    public List<Map<Action,String>> getClickActions(int button, InventoryClickType mode, TabPlayer p, int slot) {
+    public List<Map<Action,String>> getClickActions(int button, InventoryClickType mode, TabPlayer p, int slot, Page page) {
         List<Map<Action,String>> list = new ArrayList<>();
         Map<String,Object> actions = (Map<String, Object>) config.get("actions");
         if (actions == null) return list;

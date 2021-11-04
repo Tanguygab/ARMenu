@@ -71,4 +71,8 @@ public class Utils {
         return map;
     }
 
+    public static int parseInt(String arg, int i) {
+        try {return Integer.parseInt(arg);}
+        catch (Exception e) {return i;}
+    }
 }

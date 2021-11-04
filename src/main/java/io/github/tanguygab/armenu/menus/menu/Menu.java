@@ -3,6 +3,7 @@ package io.github.tanguygab.armenu.menus.menu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.item.Item;
+import io.github.tanguygab.armenu.menus.item.ListItem;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryType;
 import me.neznamy.tab.api.TabPlayer;
@@ -50,6 +51,10 @@ public class Menu {
 
     public List<Item> getItems() {
         return new ArrayList<>(items.values());
+    }
+
+    public Map<String,Item> getItemsMap() {
+        return items;
     }
 
     public boolean onOpen(TabPlayer p) {
@@ -121,7 +126,13 @@ public class Menu {
         }
         if (config.hasConfigOption("items")) {
             Map<String, Map<String, Object>> list = config.getConfigurationSection("items");
-            list.forEach((item, itemcfg) -> items.put(item, new Item(item, itemcfg)));
+            list.forEach((item, itemcfg) -> {
+                Item i;
+                if (itemcfg.containsKey("type") && itemcfg.get("type").toString().equalsIgnoreCase("LIST"))
+                    i = new ListItem(item, itemcfg);
+                else i = new Item(item, itemcfg);
+                items.put(item, i);
+            });
         }
         if (config.hasConfigOption("pages")) {
             Map<String, Map<String, Object>> pages = config.getConfigurationSection("pages");

@@ -141,7 +141,7 @@ public class MenuSession {
         menu.onEvent(p,"events.click", ClickType.get(mode,button,slot)+"",(slot+"").replace("-999","out"));
         menu.getItems().forEach(i-> {
             if (page.getItemAtSlot(slot) == i)
-                i.getClickActions(button,mode,p,slot).forEach(map->map.forEach((ac,str)-> Action.execute(str,ac,p)));
+                i.getClickActions(button,mode,p,slot,page).forEach(map->map.forEach((ac,str)-> Action.execute(str,ac,p)));
         });
 
         return true;

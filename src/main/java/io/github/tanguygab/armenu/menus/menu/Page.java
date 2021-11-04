@@ -6,8 +6,6 @@ import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.PacketPlayOutSetSlot;
 import net.minecraft.world.item.ItemStack;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +38,14 @@ public class Page {
             if (!item.getSlots(this).isEmpty())
                 setslots.add(item);
         });
+    }
+
+    public Menu getMenu() {
+        return menu;
+    }
+
+    public List<Item> getItems() {
+        return items;
     }
 
     private void createItems(String path, List<Item> items) {
