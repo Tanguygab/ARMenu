@@ -19,10 +19,6 @@ public class ExecuteCmd {
             return;
         }
         TabPlayer p = TAB.getInstance().getPlayer(args[1]);
-        if (p == null) {
-            sender.sendMessage("This player isn't online");
-            return;
-        }
         int i = 0;
         String action = "";
         for (String str : args) {

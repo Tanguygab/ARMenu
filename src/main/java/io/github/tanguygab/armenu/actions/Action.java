@@ -62,6 +62,8 @@ public abstract class Action {
 
                 new ActionBarAction(),
                 new BroadcastAction(),
+                new BroadcastActionBarAction(),
+                new BroadcastTitleAction(),
                 new ChatAction(),
                 new MessageAction(),
                 new TitleAction()

@@ -1,15 +1,19 @@
 package io.github.tanguygab.armenu.actions.messages;
 
+import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.protocol.PacketPlayOutChat;
+import me.neznamy.tab.api.protocol.TabPacket;
 
 import java.util.regex.Pattern;
 
-public class BroadcastAction extends Action {
+public class BroadcastActionBarAction extends Action {
 
-    private final Pattern pattern = Pattern.compile("(?i)(broadcast|bc):( )?");
+    private final Pattern pattern = Pattern.compile("(?i)((broadcast|bc)-actionbar):( )?");
 
     @Override
     public Pattern getPattern() {
@@ -18,7 +22,7 @@ public class BroadcastAction extends Action {
 
     @Override
     public String getSuggestion() {
-        return "broadcast: <text>";
+        return "broadcast-actionbar: <text>";
     }
 
     @Override
@@ -29,8 +33,9 @@ public class BroadcastAction extends Action {
     @Override
     public void execute(String match, TabPlayer p) {
         match = Utils.parsePlaceholders(match,p);
+        TabPacket packet = new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(match), PacketPlayOutChat.ChatMessageType.GAME_INFO);
         for (TabPlayer all : TabAPI.getInstance().getOnlinePlayers()) {
-            all.sendMessage(match, true);
+            all.sendCustomPacket(packet, ARMenu.get().getMenuManager());
         }
     }
 }
