@@ -1,15 +1,15 @@
-package io.github.tanguygab.armenu.actions;
+package io.github.tanguygab.armenu.actions.messages;
 
 import io.github.tanguygab.armenu.Utils;
+import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabPlayer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.regex.Pattern;
 
-public class MessageAction extends Action {
+public class ChatAction extends Action {
 
-    private final Pattern pattern = Pattern.compile("(?i)(message|msg|tell):( )?");
+    private final Pattern pattern = Pattern.compile("(?i)chat:( )?");
 
     @Override
     public Pattern getPattern() {
@@ -25,6 +25,7 @@ public class MessageAction extends Action {
     public void execute(String match, TabPlayer p) {
         if (p == null) return;
         match = Utils.parsePlaceholders(match,p);
-        p.sendMessage(match,true);
+        String finalMatch = match;
+        runSync(()->((Player)p.getPlayer()).chat(finalMatch));
     }
 }

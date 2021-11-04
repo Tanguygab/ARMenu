@@ -1,16 +1,17 @@
-package io.github.tanguygab.armenu.actions.pages;
+package io.github.tanguygab.armenu.actions.menus;
 
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.MenuSession;
+import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
 
 import java.util.regex.Pattern;
 
-public class UpdatePageAction extends Action {
+public class SetPageAction extends Action {
 
-    private final Pattern pattern = Pattern.compile("(?i)update-page:( )?");
+    private final Pattern pattern = Pattern.compile("(?i)set-page:( )?");
 
     @Override
     public Pattern getPattern() {
@@ -27,7 +28,8 @@ public class UpdatePageAction extends Action {
         MenuSession session;
         if (p == null || (session = ARMenu.get().getMenuManager().sessions.get(p)) == null) return;
         match = Utils.parsePlaceholders(match,p);
-        try {session.updatePage(Integer.parseInt(match));}
-        catch (Exception ignored) {}
+        Page page = session.getMenu().getPages().get(match);
+        if (page == null) return;
+        session.setPage(page);
     }
 }

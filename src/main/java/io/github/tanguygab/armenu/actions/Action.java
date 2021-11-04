@@ -6,8 +6,9 @@ import io.github.tanguygab.armenu.actions.commands.PermissionAction;
 import io.github.tanguygab.armenu.actions.commands.PlayerAction;
 import io.github.tanguygab.armenu.actions.menus.InventoryPropertyAction;
 import io.github.tanguygab.armenu.actions.menus.RefreshAction;
-import io.github.tanguygab.armenu.actions.pages.SetPageAction;
-import io.github.tanguygab.armenu.actions.pages.UpdatePageAction;
+import io.github.tanguygab.armenu.actions.messages.*;
+import io.github.tanguygab.armenu.actions.menus.SetPageAction;
+import io.github.tanguygab.armenu.actions.menus.UpdatePageAction;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.Bukkit;
 
@@ -49,14 +50,21 @@ public abstract class Action {
 
 
     public static void registerAll() {
-        Action.register(new ChatAction(),
+        Action.register(
                 new ConsoleAction(),
                 new PlayerAction(),
-                new MessageAction(),
+
+                new InventoryPropertyAction(),
+                new RefreshAction(),
                 new SetPageAction(),
                 new UpdatePageAction(),
-                new RefreshAction(),
-                new InventoryPropertyAction()
+
+                new ActionBarAction(),
+                new BroadcastAction(),
+                new ChatAction(),
+                new MessageAction(),
+                new TitleAction()
+
         );
         if (Bukkit.getServer().getPluginManager().isPluginEnabled("LuckPerms"))
             Action.register(new PermissionAction());
