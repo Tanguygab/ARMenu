@@ -57,7 +57,9 @@ public class MenuManager extends TabFeature {
             }
 
             PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
-            pm.registerServerPlaceholder("%armenu_menus_all%",999999900,()->menus.size()+"");
+            pm.registerServerPlaceholder("%armenu-menus-all%",999999900,()->menus.size()+"");
+            pm.registerPlayerPlaceholder("%menu%",1000,p->sessions.containsKey(p) ? sessions.get(p).getMenu().getName() : "");
+            pm.registerPlayerPlaceholder("%menu-page%",1000,p->sessions.containsKey(p) ? sessions.get(p).getPage().getName() : "");
         } catch (IOException e) {
             e.printStackTrace();
         }

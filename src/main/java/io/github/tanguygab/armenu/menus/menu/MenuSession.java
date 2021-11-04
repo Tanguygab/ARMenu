@@ -43,6 +43,9 @@ public class MenuSession {
     public Menu getMenu() {
         return menu;
     }
+    public Page getPage() {
+        return page;
+    }
 
     public void openMenu() {
         if (!menu.onOpen(p)) {
