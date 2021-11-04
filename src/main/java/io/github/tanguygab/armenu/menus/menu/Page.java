@@ -121,11 +121,11 @@ public class Page {
 
 
     public void onOpen(TabPlayer p) {
-        menu.onEvent(p,"pages."+name+".events.open");
+        menu.onEvent(p,"pages."+name+".events.open","","");
     }
 
     public void onClose(TabPlayer p) {
-        menu.onEvent(p,"pages."+name+".events.close");
+        menu.onEvent(p,"pages."+name+".events.close","","");
     }
 
 }

@@ -3,6 +3,7 @@ package io.github.tanguygab.armenu.menus.menu;
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
+import io.github.tanguygab.armenu.menus.item.ClickType;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryButton;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryType;
@@ -90,6 +91,7 @@ public class MenuSession {
     public void setInventoryProperty(InventoryProperty prop, int value) {
         PacketPlayOutWindowData packet = new PacketPlayOutWindowData(66,prop.getProperty(),value);
         customInventoryProperties.add(packet);
+        lastSentPacket.add(packet);
         p.sendPacket(packet,ARMenu.get().getMenuManager());
     }
 
@@ -133,6 +135,7 @@ public class MenuSession {
 
     public boolean onClickPacket(int slot, int button, InventoryClickType mode) {
         sendPackets(false);
+        menu.onEvent(p,"events.click", ClickType.get(mode,button,slot)+"",(slot+"").replace("-999","out"));
         menu.getItems().forEach(i-> {
             if (page.getItemAtSlot(slot) == i)
                 i.getClickActions(button,mode,p).forEach(map->map.forEach((ac,str)-> Action.execute(str,ac,p)));

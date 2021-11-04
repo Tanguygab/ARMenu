@@ -53,14 +53,14 @@ public class Menu {
     }
 
     public boolean onOpen(TabPlayer p) {
-        return onEvent(p,"events.open");
+        return onEvent(p,"events.open","","");
     }
 
     public boolean onClose(TabPlayer p) {
-        return onEvent(p,"events.close");
+        return onEvent(p,"events.close","","");
     }
 
-    public boolean onEvent(TabPlayer p, String path) {
+    public boolean onEvent(TabPlayer p, String path, String click, String where) {
         if (!config.hasConfigOption(path)) return true;
 
         List<Object> cfg = (List<Object>) config.getObject(path);
@@ -68,13 +68,13 @@ public class Menu {
         List<Map<Action,String>> list = new ArrayList<>();
         for (Object element : cfg) {
             if (element instanceof String el)
-                list.add(Utils.map(el));
+                list.add(Utils.map(el.replace("%click%",click).replace("%where%",where)));
             if (element instanceof Map<?,?> condmap) {
                 String cond = condmap.get("condition")+"";
-                Condition condition = Condition.getCondition(cond);
+                Condition condition = Condition.getCondition(cond.replace("%click%",click).replace("%where%",where));
                 String section = (condition.isMet(p) ? "" : "deny-") + "actions";
                 if (!condmap.containsKey(section)) continue;
-                ((List<String>)condmap.get(section)).forEach(str->list.add(Utils.map(str)));
+                ((List<String>)condmap.get(section)).forEach(str->list.add(Utils.map(str.replace("%click%",click).replace("%where%",where))));
             }
         }
 

@@ -3,16 +3,15 @@ package io.github.tanguygab.armenu.menus.item;
 import net.minecraft.world.inventory.InventoryClickType;
 
 import java.util.List;
+import java.util.Locale;
 
 public enum ClickType {
 
     LEFT_CLICK(InventoryClickType.a,0,-1,"left","left_click"),
     RIGHT_CLICK(InventoryClickType.a,1,-1,"right","right_click"),
-    LEFT_CLICK_OUT(InventoryClickType.a,2,-999,"left_out","right_click_out"),
-    RIGHT_CLICK_OUT(InventoryClickType.a,3,-999,"right_out","right_click_out"),
 
-    SHIFT_lEFT_CLICK(InventoryClickType.b,1,-1,"shift_left","shift_left_click"),
-    SHIFT_RIGHT_CLICK(InventoryClickType.b,2,-1,"shift_rigt","shift_right_click"),
+    SHIFT_lEFT_CLICK(InventoryClickType.b,0,-1,"shift_left","shift_left_click"),
+    SHIFT_RIGHT_CLICK(InventoryClickType.b,1,-1,"shift_rigt","shift_right_click"),
 
     NUMPAD_1(InventoryClickType.c,0,-1,"num_1","numpad_1"),
     NUMPAD_2(InventoryClickType.c,1,-1,"num_2","numpad_2"),
@@ -28,7 +27,10 @@ public enum ClickType {
     MIDDLE_CLICK(InventoryClickType.d,2,-1,"middle","middle_click"),
 
     DROP_KEY(InventoryClickType.e,0,-1,"drop","drop_key"),
-    CONTROL_DROP_KEY(InventoryClickType.e,1,-1,"ctrl_drop","control_drop_key"),
+    CONTROL_DROP_KEY(InventoryClickType.e,1,-1,"ctrl_draop","control_drop_key"),
+    //apparently those two are here... weird that https://wiki.vg/Protocol#Click_Window says that it's inside the first mode
+    LEFT_CLICK_OUT(InventoryClickType.e,0,-999,"left_out","right_click_out"),
+    RIGHT_CLICK_OUT(InventoryClickType.e,1,-999,"right_out","right_click_out"),
     
     START_LEFT_DRAG(InventoryClickType.f,0,-999,"start_left_drag"),
     START_RIGHT_DRAG(InventoryClickType.f,4,-999,"start_right_drag"),
@@ -59,6 +61,16 @@ public enum ClickType {
         return null;
     }
 
+    public static ClickType get(InventoryClickType click, int button, int slot) {
+        for (ClickType type : values()) {
+            if (type.mode != click) continue;
+            if (type.button != button) continue;
+            if (slot == -999 && type.slot != -999) continue;
+            return type;
+        }
+        return null;
+    }
+
     public InventoryClickType getMode() {
         return mode;
     }
@@ -73,5 +85,11 @@ public enum ClickType {
 
     public List<String> getNames() {
         return names;
+    }
+
+
+    @Override
+    public String toString() {
+        return super.toString().replace("_"," ").toLowerCase(Locale.ROOT);
     }
 }
