@@ -1,6 +1,7 @@
 package io.github.tanguygab.armenu.menus.menu.InventoryEnums;
 
 import java.util.List;
+import java.util.Locale;
 
 public enum InventoryButton {
 
@@ -46,5 +47,10 @@ public enum InventoryButton {
                 return button;
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString().replace("_"," ").toLowerCase();
     }
 }

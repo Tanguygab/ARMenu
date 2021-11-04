@@ -147,6 +147,7 @@ public class MenuSession {
     public void onMenuButton(int buttonId) {
         InventoryButton button = InventoryButton.get(menu.getType(),buttonId);
         if (button == null) return;
+        menu.onEvent(p,"events.click", button.toString(),button.getId()+"");
 
     }
 }
