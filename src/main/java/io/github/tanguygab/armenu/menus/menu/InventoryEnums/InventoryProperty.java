@@ -55,6 +55,10 @@ public enum InventoryProperty {
         return property;
     }
 
+    public List<InventoryType> getTypes() {
+        return types;
+    }
+
     public static InventoryProperty get(InventoryType type, int property) {
         for (InventoryProperty prop : values()) {
             if (!prop.types.contains(type)) continue;

@@ -102,7 +102,7 @@ public class Menu {
             Map<String,Object> props = config.getConfigurationSection("menu-properties");
             props.forEach((prop,value) -> {
                 InventoryProperty property = InventoryProperty.get(prop);
-                if (property != null)
+                if (property != null && property.getTypes().contains(type))
                     properties.put(property,value);
             });
         }
