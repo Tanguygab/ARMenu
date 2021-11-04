@@ -17,6 +17,11 @@ public class RefreshAction extends Action {
     }
 
     @Override
+    public String getSuggestion() {
+        return "refresh";
+    }
+
+    @Override
     public boolean replaceMatch() {
         return false;
     }

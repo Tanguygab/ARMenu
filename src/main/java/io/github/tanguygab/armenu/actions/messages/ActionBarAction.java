@@ -19,6 +19,11 @@ public class ActionBarAction extends Action {
     }
 
     @Override
+    public String getSuggestion() {
+        return "actionbar: <text>";
+    }
+
+    @Override
     public boolean replaceMatch() {
         return true;
     }

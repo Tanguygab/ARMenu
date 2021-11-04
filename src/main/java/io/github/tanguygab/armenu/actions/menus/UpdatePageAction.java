@@ -18,6 +18,11 @@ public class UpdatePageAction extends Action {
     }
 
     @Override
+    public String getSuggestion() {
+        return "update-page: <amount>";
+    }
+
+    @Override
     public boolean replaceMatch() {
         return true;
     }

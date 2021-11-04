@@ -17,6 +17,11 @@ public class ChatAction extends Action {
     }
 
     @Override
+    public String getSuggestion() {
+        return "chat: <text>";
+    }
+
+    @Override
     public boolean replaceMatch() {
         return true;
     }

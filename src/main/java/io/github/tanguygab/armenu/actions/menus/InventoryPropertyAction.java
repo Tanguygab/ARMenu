@@ -7,7 +7,6 @@ import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
 import io.github.tanguygab.armenu.menus.menu.MenuSession;
 import me.neznamy.tab.api.TabPlayer;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class InventoryPropertyAction extends Action {
@@ -17,6 +16,11 @@ public class InventoryPropertyAction extends Action {
     @Override
     public Pattern getPattern() {
         return pattern;
+    }
+
+    @Override
+    public String getSuggestion() {
+        return "set-inventory-property: <property> <value>";
     }
 
     @Override

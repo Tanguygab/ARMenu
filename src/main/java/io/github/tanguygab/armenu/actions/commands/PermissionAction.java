@@ -17,11 +17,16 @@ import java.util.regex.Pattern;
 
 public class PermissionAction extends Action {
 
-    private final Pattern pattern = Pattern.compile("(?i)(perm|permission):(?<permission>[a-zA-Z0-9.*_\\- \",]+):( )?");
+    private final Pattern pattern = Pattern.compile("(?i)(permission|perm):(?<permission>[a-zA-Z0-9.*_\\- \",]+):( )?");
 
     @Override
     public Pattern getPattern() {
         return pattern;
+    }
+
+    @Override
+    public String getSuggestion() {
+        return "permission:<permission>: <command>";
     }
 
     @Override

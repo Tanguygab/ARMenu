@@ -18,6 +18,11 @@ public class MessageAction extends Action {
     }
 
     @Override
+    public String getSuggestion() {
+        return "message: <text>";
+    }
+
+    @Override
     public boolean replaceMatch() {
         return true;
     }

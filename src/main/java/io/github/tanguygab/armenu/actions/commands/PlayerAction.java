@@ -1,6 +1,5 @@
 package io.github.tanguygab.armenu.actions.commands;
 
-import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabPlayer;
@@ -16,6 +15,11 @@ public class PlayerAction extends Action {
     @Override
     public Pattern getPattern() {
         return pattern;
+    }
+
+    @Override
+    public String getSuggestion() {
+        return "player: <command>";
     }
 
     @Override

@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 public abstract class Action {
 
     private static final List<Action> actions = new ArrayList<>();
+    public static final List<String> suggestions = new ArrayList<>();
 
     public static Action find(String action) {
         for (Action ac : actions) {
@@ -66,11 +67,21 @@ public abstract class Action {
                 new TitleAction()
 
         );
+        getSugestions();
         if (Bukkit.getServer().getPluginManager().isPluginEnabled("LuckPerms"))
             Action.register(new PermissionAction());
     }
 
+    public static void getSugestions() {
+        actions.forEach(action->{
+            if (action.getSuggestion() != null)
+                suggestions.add(action.getSuggestion());
+        });
+    }
+
     public abstract Pattern getPattern();
+
+    public abstract String getSuggestion();
 
     public abstract boolean replaceMatch();
 

@@ -5,7 +5,6 @@ import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.entity.Player;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TitleAction extends Action {
@@ -15,6 +14,11 @@ public class TitleAction extends Action {
     @Override
     public Pattern getPattern() {
         return pattern;
+    }
+
+    @Override
+    public String getSuggestion() {
+        return "title: <title>;<subtitle>;<fadein>;<stay>;<fadeout>";
     }
 
     @Override
@@ -42,7 +46,7 @@ public class TitleAction extends Action {
         if (matches.length > 4)
             fadeout = parseInt(matches[4]);
 
-        ((Player)p).sendTitle(title,subtitle,fadein,stay,fadeout);
+        ((Player)p.getPlayer()).sendTitle(title,subtitle,fadein,stay,fadeout);
     }
 
     private int parseInt(String str) {

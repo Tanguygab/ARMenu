@@ -17,6 +17,11 @@ public class ConsoleAction extends Action {
     }
 
     @Override
+    public String getSuggestion() {
+        return "console: <command>";
+    }
+
+    @Override
     public boolean replaceMatch() {
         return true;
     }

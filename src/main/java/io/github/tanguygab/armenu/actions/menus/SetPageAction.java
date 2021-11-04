@@ -19,6 +19,11 @@ public class SetPageAction extends Action {
     }
 
     @Override
+    public String getSuggestion() {
+        return "set-page: <page>";
+    }
+
+    @Override
     public boolean replaceMatch() {
         return true;
     }

@@ -17,6 +17,11 @@ public class BroadcastAction extends Action {
     }
 
     @Override
+    public String getSuggestion() {
+        return "broadcast: <text>";
+    }
+
+    @Override
     public boolean replaceMatch() {
         return true;
     }

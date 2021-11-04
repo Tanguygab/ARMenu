@@ -10,8 +10,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public final class ARMenu extends JavaPlugin implements CommandExecutor {
@@ -72,15 +70,15 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1)
-            return Arrays.asList("help","open","list","create","execute","items","reload");
+            return List.of("help","open","list","create","execute","items","reload");
         switch (args[0]) {
             case "open" -> {if (args.length == 2) return mm.getMenus();}
-            case "execute" -> {if (args.length == 3) return Collections.singletonList("<action>");}
+            case "execute" -> {if (args.length == 3) return Action.suggestions;}
             case "items" -> {
-                if (args.length == 2) return Arrays.asList("give","take","save","delete","list");
+                if (args.length == 2) return List.of("give","take","save","delete","list");
                 if (args.length == 3 && !args[1].equalsIgnoreCase("list")) return itemStorage.getItems();
                 if (args.length == 4 && (args[1].equalsIgnoreCase("give") || args[1].equalsIgnoreCase("take")))
-                    return Collections.singletonList("<amount>");
+                    return List.of("<amount>");
             }
         }
         return null;
