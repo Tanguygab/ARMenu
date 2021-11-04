@@ -119,7 +119,7 @@ public class Item {
     public net.minecraft.world.item.ItemStack getItem(int frame, TabPlayer p, Page page, int slot) {
         if (materials.isEmpty()) return net.minecraft.world.item.ItemStack.b;
 
-        String m = placeholders(materials.get(frame),p,page,slot);
+        String m = placeholders(materials.get(frame),p,page,slot).replace(" ", "_").toUpperCase();
         Material m2 = Material.getMaterial(m);
         if (m2 == null) return net.minecraft.world.item.ItemStack.b;
         ItemStack item = new ItemStack(m2);
@@ -143,13 +143,13 @@ public class Item {
         return CraftItemStack.asNMSCopy(item);
     }
 
-    private String placeholders(String text, TabPlayer p, Page page, int slot) {
+    protected String placeholders(String text, TabPlayer p, Page page, int slot) {
         return Utils.parsePlaceholders(text
                 .replace("%page%",page.getName())
                 .replace("%slot%",slot+""),p);
     }
 
-    public List<Map<Action,String>> getClickActions(int button, InventoryClickType mode, TabPlayer p) {
+    public List<Map<Action,String>> getClickActions(int button, InventoryClickType mode, TabPlayer p, int slot) {
         List<Map<Action,String>> list = new ArrayList<>();
         Map<String,Object> actions = (Map<String, Object>) config.get("actions");
         if (actions == null) return list;

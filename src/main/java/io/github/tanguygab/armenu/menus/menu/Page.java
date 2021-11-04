@@ -110,8 +110,9 @@ public class Page {
 
     public Item getItemAtSlot(int slot) {
         if (slot == -999) return null;
-        if (slot > items.size()) {
-            slot = slot-items.size();
+        int size = menu.getType() != null ? menu.getType().getSize() : items.size();
+        if (slot >= size) {
+            slot = slot-size;
             if (playerInvItems == null || playerInvItems.size() <= slot) return null;
             return playerInvItems.get(slot);
         }
