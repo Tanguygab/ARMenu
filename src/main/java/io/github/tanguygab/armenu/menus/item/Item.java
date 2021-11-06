@@ -1,17 +1,23 @@
 package io.github.tanguygab.armenu.menus.item;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.features.layout.SkinManager;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import net.minecraft.world.inventory.InventoryClickType;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class Item {
@@ -49,7 +55,7 @@ public class Item {
         return list;
     }
 
-    private List<String> getNames() {
+    public List<String> getNames() {
         Object name = config.get("name");
         if (name == null) return List.of();
 
@@ -58,7 +64,7 @@ public class Item {
         return (List<String>) name;
     }
 
-    private List<String> getAmounts() {
+    public List<String> getAmounts() {
         Object amount = config.get("amount");
         if (amount == null) return List.of();
 
@@ -68,7 +74,7 @@ public class Item {
         ((List<?>)amount).forEach(i->list.add(i+""));
         return list;
     }
-    private List<String> getMaterials() {
+    public List<String> getMaterials() {
         Object mat = config.get("material");
         if (mat == null) return List.of();
 
@@ -77,7 +83,7 @@ public class Item {
         return (List<String>) mat;
     }
 
-    private List<List<String>> getLores() {
+    public List<List<String>> getLores() {
         if (config.containsKey("lore")) {
             List<?> lore = (List<?>) config.get("lore");
             if (lore.isEmpty()) return List.of(List.of());
@@ -87,7 +93,7 @@ public class Item {
         return List.of(List.of());
     }
 
-    private Map<String,List<List<String>>> getSlots() {
+    public Map<String,List<List<String>>> getSlots() {
         Map<String,List<List<String>>> map = new HashMap<>();
 
         if (!config.containsKey("slot")) {
@@ -116,13 +122,48 @@ public class Item {
         return map;
     }
 
+    public ItemStack getSkull(Object url) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+
+        ItemMeta skullMeta = head.getItemMeta();
+        GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+        profile.getProperties().putAll((PropertyMap) url);
+
+        try {
+            Field profileField = skullMeta.getClass().getDeclaredField("profile");
+            profileField.setAccessible(true);
+            profileField.set(skullMeta, profile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        head.setItemMeta(skullMeta);
+        return head;
+    }
+
+    public boolean isSkinMat(String mat) {
+        return mat.startsWith("texture:")
+                || mat.startsWith("mineskin:")
+                || mat.startsWith("player:");
+    }
+
     public net.minecraft.world.item.ItemStack getItem(int frame, TabPlayer p, Page page, int slot) {
         if (materials.isEmpty()) return net.minecraft.world.item.ItemStack.b;
 
-        String m = placeholders(materials.get(frame),p,page,slot).replace(" ", "_").toUpperCase();
-        Material m2 = Material.getMaterial(m);
-        if (m2 == null) return net.minecraft.world.item.ItemStack.b;
-        ItemStack item = new ItemStack(m2);
+        String m = placeholders(materials.get(frame),p,page,slot);
+        ItemStack item;
+
+        p.sendMessage(isSkinMat(m)+"",false);
+        if (isSkinMat(m)) {
+            Object skin = ARMenu.get().getMenuManager().skins.getSkin(m);
+            if (skin == null)
+                return net.minecraft.world.item.ItemStack.b;
+            item = getSkull(skin);
+        } else {
+            Material m2 = Material.getMaterial(m.replace(" ", "_").toUpperCase());
+            if (m2 == null) return net.minecraft.world.item.ItemStack.b;
+            item = new ItemStack(m2);
+        }
 
         if (!amounts.isEmpty()) {
             String amount = placeholders(amounts.get(frame),p,page,slot);

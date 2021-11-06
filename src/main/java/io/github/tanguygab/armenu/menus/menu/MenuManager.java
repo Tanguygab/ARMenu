@@ -7,6 +7,7 @@ import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
+import me.neznamy.tab.shared.features.layout.SkinManager;
 import net.minecraft.network.protocol.game.PacketPlayInCloseWindow;
 import net.minecraft.network.protocol.game.PacketPlayInEnchantItem;
 import net.minecraft.network.protocol.game.PacketPlayInWindowClick;
@@ -26,11 +27,13 @@ public class MenuManager extends TabFeature {
     public ConfigurationFile config;
     public Map<String, Menu> menus = new HashMap<>();
     public Map<TabPlayer, MenuSession> sessions = new HashMap<>();
+    public SkinManager skins;
 
     public MenuManager() {
         super("&2ARMenu&r");
         try {
             config = new YamlConfigurationFile(ARMenu.class.getClassLoader().getResourceAsStream("config.yml"), new File(ARMenu.get().getDataFolder(), "config.yml"));
+            skins = new SkinManager("texture:f3d5e43de5d4177c4baf2f44161554473a3b0be5430998b5fcd826af943afe3");
         } catch (IOException e) {
             e.printStackTrace();
         }

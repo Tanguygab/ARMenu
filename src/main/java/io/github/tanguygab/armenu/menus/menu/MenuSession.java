@@ -11,10 +11,7 @@ import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.PacketListenerPlayOut;
-import net.minecraft.network.protocol.game.PacketPlayOutOpenWindow;
-import net.minecraft.network.protocol.game.PacketPlayOutWindowData;
-import net.minecraft.network.protocol.game.PacketPlayOutWindowItems;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
 
@@ -57,6 +54,12 @@ public class MenuSession {
 
         page = new ArrayList<>(menu.getPages().values()).get(0);
         sendPackets(true);
+    }
+
+    public void closeMenu() {
+        p.sendPacket(new PacketPlayOutCloseWindow(66));
+        ARMenu.get().getMenuManager().sessions.remove(p);
+        p.setProperty(ARMenu.get().getMenuManager(),"armenu",menu.getName());
     }
 
     public void onClosePacket() {

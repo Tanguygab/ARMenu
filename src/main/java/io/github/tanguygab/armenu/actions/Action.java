@@ -52,6 +52,7 @@ public abstract class Action {
                 new ConsoleAction(),
                 new PlayerAction(),
 
+                new CloseAction(),
                 new InventoryPropertyAction(),
                 new RefreshAction(),
                 new SetPageAction(),

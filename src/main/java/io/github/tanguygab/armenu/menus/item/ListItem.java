@@ -59,72 +59,6 @@ public class ListItem extends Item{
         if (list.containsKey("separator")) separator = list.get("separator")+"";
     }
 
-    private List<String> getNames() {
-        Object name = config.get("name");
-        if (name == null) return List.of();
-
-        if (name instanceof String)
-            return List.of(name+"");
-        return (List<String>) name;
-    }
-
-    private List<String> getAmounts() {
-        Object amount = config.get("amount");
-        if (amount == null) return List.of();
-
-        if (amount instanceof String || amount instanceof Integer)
-            return List.of(amount+"");
-        List<String> list = new ArrayList<>();
-        ((List<?>)amount).forEach(i->list.add(i+""));
-        return list;
-    }
-    private List<String> getMaterials() {
-        Object mat = config.get("material");
-        if (mat == null) return List.of();
-
-        if (mat instanceof String)
-            return List.of(mat+"");
-        return (List<String>) mat;
-    }
-
-    private List<List<String>> getLores() {
-        if (config.containsKey("lore")) {
-            List<?> lore = (List<?>) config.get("lore");
-            if (lore.isEmpty()) return List.of(List.of());
-            if (lore.get(0) instanceof List<?>) return (List<List<String>>) lore;
-            else return List.of((List<String>)lore);
-        }
-        return List.of(List.of());
-    }
-
-    private Map<String,List<List<String>>> getSlots() {
-        Map<String,List<List<String>>> map = new HashMap<>();
-
-        if (!config.containsKey("slot")) {
-            return map;
-        }
-
-        Object opt = config.get("slot");
-        if (opt instanceof String || opt instanceof Integer) {
-            map.put("__ALL__",List.of(List.of(opt+"")));
-            return map;
-        }
-        Map<String,Object> slots = (Map<String, Object>) opt;
-        if (slots.isEmpty()) return map;
-
-        slots.forEach((page,slot)->{
-            List<List<String>> list = new ArrayList<>();
-            ((List<?>)slot).forEach(s -> {
-                if (s instanceof List<?>)
-                    list.add((List<String>) s);
-                else list.add(List.of(s+""));
-            });
-
-            map.put(page,list);
-        });
-
-        return map;
-    }
 
     public List<String> getLayoutSlots(Menu menu) {
         List<String> list = new ArrayList<>();
@@ -178,10 +112,19 @@ public class ListItem extends Item{
         String listPos = list[0];
         String listItem = list[1];
 
-        String m = placeholders(materials.get(frame),p,page,slot,listPos,listItem).replace(" ", "_").toUpperCase();
-        Material m2 = Material.getMaterial(m);
-        if (m2 == null) return net.minecraft.world.item.ItemStack.b;
-        ItemStack item = new ItemStack(m2);
+        String m = placeholders(materials.get(frame),p,page,slot,listPos,listItem);
+        ItemStack item;
+
+        if (isSkinMat(m)) {
+            Object skin = ARMenu.get().getMenuManager().skins.getSkin(m);
+            if (skin == null)
+                return net.minecraft.world.item.ItemStack.b;
+            item = getSkull(skin);
+        } else {
+            Material m2 = Material.getMaterial(m.replace(" ", "_").toUpperCase());
+            if (m2 == null) return net.minecraft.world.item.ItemStack.b;
+            item = new ItemStack(m2);
+        }
 
         if (!amounts.isEmpty()) {
             String amount = placeholders(amounts.get(frame),p,page,slot,listPos,listItem);
