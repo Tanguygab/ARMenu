@@ -1,6 +1,7 @@
 package io.github.tanguygab.armenu.menus.menu;
 
 import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.commands.CreateCmd;
 import me.neznamy.tab.api.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
@@ -15,7 +16,6 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +27,7 @@ public class MenuManager extends TabFeature {
     public ConfigurationFile config;
     public Map<String, Menu> menus = new HashMap<>();
     public Map<TabPlayer, MenuSession> sessions = new HashMap<>();
+    public Map<TabPlayer, CreateCmd> creators = new HashMap<>();
     public SkinManager skins;
 
     public MenuManager() {
@@ -88,7 +89,7 @@ public class MenuManager extends TabFeature {
 
     public Menu getMenu(TabPlayer p) {
         String menuproperty = p.getProperty("armenu").get();
-        if (menuproperty == null) return null;
+        if (menuproperty == null || menuproperty.equals("")) return null;
         return getMenu(menuproperty);
     }
 
@@ -112,6 +113,19 @@ public class MenuManager extends TabFeature {
     @Override
     public boolean onPacketReceive(TabPlayer p, Object packet) {
         MenuSession session;
+
+        if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && creators.containsKey(p)) {
+            CreateCmd creator = creators.get(p);
+            ItemStack placed = ItemStack.b;
+            try {placed = (ItemStack) click.f().getClass().getMethod("getOrDefault", int.class, Object.class).invoke(click.f(),click.c(),ItemStack.b);}
+            catch (Exception e) {e.printStackTrace();}
+            creator.addItem(placed,click.c());
+        }
+        if (packet instanceof PacketPlayInCloseWindow click && click.b() == 66 && creators.containsKey(p)) {
+            CreateCmd creator = creators.get(p);
+            creator.close();
+        }
+
         if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && (session = sessions.get(p)) != null) {
             int slot = click.c();
             int button = click.d();
