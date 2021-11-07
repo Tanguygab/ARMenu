@@ -118,16 +118,18 @@ public class MenuSession {
         for (int i = 0; i < page.getItems().size(); i++)
             currentItems.put(i,page.getItems().get(i));
 
+        int size = menu.getType() != null ? menu.getType().getSize() : page.getLayoutSize();
+
         if (page.getPlayerInvItems() != null) {
-            for (int i = 9; i < page.getPlayerInvItems().size() + 9; i++) {
-                currentItems.put(i, page.getPlayerInvItems().get(i));
+            for (int i = 0; i < page.getPlayerInvItems().size(); i++) {
+                currentItems.put(i+size, page.getPlayerInvItems().get(i));
             }
             NonNullList<ItemStack> list = page.getPlayerInvItems(p, 0);
-            list.forEach(itemStack -> {
-                lastSentItems.set(list.indexOf(itemStack)+page.getLayoutSize(),itemStack);
-            });
+
+            if (lastSentItems != null)
+                list.forEach(itemStack -> lastSentItems.set(list.indexOf(itemStack)+size,itemStack));
         } else {
-            playerInventoryOnOpen.forEach((slot,i)->currentItems.put(slot+page.getLayoutSize(),i));
+            playerInventoryOnOpen.forEach((slot,i)->currentItems.put(slot+size,i));
         }
         sendPackets(true);
     }
