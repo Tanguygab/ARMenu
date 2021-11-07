@@ -4,9 +4,12 @@ import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.item.ClickType;
+import io.github.tanguygab.armenu.menus.item.InvItem;
+import io.github.tanguygab.armenu.menus.item.Item;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryButton;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryType;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.IChatBaseComponent;
@@ -14,10 +17,12 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class MenuSession {
 
@@ -26,8 +31,12 @@ public class MenuSession {
 
     private Page page;
     private List<Packet<PacketListenerPlayOut>> lastSentPacket = null;
-
+    private NonNullList<ItemStack> lastSentItems = null;
     private final List<PacketPlayOutWindowData> customInventoryProperties = new ArrayList<>();
+
+    public final Map<Integer,Item> currentItems = new HashMap<>();
+
+    public final Map<Integer,Item> playerInventoryOnOpen = new HashMap<>();
 
     public MenuSession(TabPlayer p, Menu menu) {
         this.p = p;
@@ -52,8 +61,25 @@ public class MenuSession {
 
         p.setProperty(ARMenu.get().getMenuManager(),"armenu",menu.getName());
 
-        page = new ArrayList<>(menu.getPages().values()).get(0);
-        sendPackets(true);
+
+        org.bukkit.inventory.ItemStack[] items = ((Player)p.getPlayer()).getInventory().getStorageContents();
+        List<Item> list = new ArrayList<>();
+        List<Item> hotbar = new ArrayList<>();
+        for (int i = 0; i < items.length; i++) {
+            if (i < 9)
+                hotbar.add(new InvItem(items[i], i));
+            else
+                list.add(new InvItem(items[i], i));
+        }
+        list.addAll(hotbar);
+        for (int i = 0; i < list.size(); i++)
+            playerInventoryOnOpen.put(i,list.get(i));
+
+        setPage(new ArrayList<>(menu.getPages().values()).get(0));
+
+        //TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,"refreshing ARMenu menu for player "+p.getName(),ARMenu.get().getMenuManager(),"refreshing",()->{
+
+        //});
     }
 
     public void closeMenu() {
@@ -74,14 +100,35 @@ public class MenuSession {
 
     public void sendPackets(boolean refresh) {
         List<Packet<PacketListenerPlayOut>> packets = refresh ? getInventoryPackets() : lastSentPacket;
-        packets.forEach(packet-> p.sendPacket(packet,ARMenu.get().getMenuManager()));
+        MenuManager mm = ARMenu.get().getMenuManager();
+        packets.forEach(packet-> p.sendPacket(packet,mm));
+        if (!refresh) {
+            if (lastSentItems != null)
+                p.sendPacket(new PacketPlayOutWindowItems(66, 1, lastSentItems, ItemStack.b),mm);
+        }
         lastSentPacket = packets;
     }
 
     public void setPage(Page page) {
-        if (this.page == page) return;
-        this.page.onClose(p);
+        if (page == null || this.page == page ) return;
+        if (this.page != null)
+            this.page.onClose(p);
         this.page = page;
+        currentItems.clear();
+        for (int i = 0; i < page.getItems().size(); i++)
+            currentItems.put(i,page.getItems().get(i));
+
+        if (page.getPlayerInvItems() != null) {
+            for (int i = 9; i < page.getPlayerInvItems().size() + 9; i++) {
+                currentItems.put(i, page.getPlayerInvItems().get(i));
+            }
+            NonNullList<ItemStack> list = page.getPlayerInvItems(p, 0);
+            list.forEach(itemStack -> {
+                lastSentItems.set(list.indexOf(itemStack)+page.getLayoutSize(),itemStack);
+            });
+        } else {
+            playerInventoryOnOpen.forEach((slot,i)->currentItems.put(slot+page.getLayoutSize(),i));
+        }
         sendPackets(true);
     }
 
@@ -102,27 +149,31 @@ public class MenuSession {
     }
 
     public List<Packet<PacketListenerPlayOut>> getInventoryPackets() {
-        List<Packet<PacketListenerPlayOut>> list = new ArrayList<>();
-        int frame = 0;
         page.onOpen(p);
-        NonNullList<ItemStack> pageItems = page.getItems(p,frame);
-        InventoryType type = menu.getType() != null ? menu.getType() : InventoryType.get(""+pageItems.size());
-        if (type == null) type = InventoryType.NORMAL_54;
+        int frame = 0;
 
-        list.addAll(page.getSetSlots(p, frame));
-        list.addAll(getInventoryProperties());
-        NonNullList<ItemStack> pInvItems = NonNullList.a();
-        while (pInvItems.size() < 9) pInvItems.add(ItemStack.b);
-        pInvItems.addAll(page.getPlayerInvItems(p,frame));
-        if (pInvItems.size() > 9)
-            list.add(new PacketPlayOutWindowItems(0, 1, pInvItems, ItemStack.b));
-        list.add(new PacketPlayOutWindowItems(66, 1, pageItems, ItemStack.b));
+        List<Packet<PacketListenerPlayOut>> list = new ArrayList<>();
 
 
         IChatBaseComponent title = IChatBaseComponent.a(menu.getTitles().get(frame));
-        PacketPlayOutOpenWindow open = new PacketPlayOutOpenWindow(66, type.container, title);
-        list.add(open);
-        Collections.reverse(list);
+        InventoryType type = menu.getType() != null ? menu.getType() : InventoryType.get("" + page.getLayoutSize());
+        if (type == null)
+            type = InventoryType.NORMAL_54;
+        list.add(new PacketPlayOutOpenWindow(66, type.container, title));
+
+
+        NonNullList<ItemStack> pageItems = NonNullList.a();
+        currentItems.forEach((slot, item) -> {
+            if (item != null)
+                pageItems.add(item.getItem(frame, p, page, slot));
+            else pageItems.add(ItemStack.b);
+        });
+        lastSentItems = pageItems;
+
+        list.add(new PacketPlayOutWindowItems(66, 1, pageItems, ItemStack.b));
+
+        list.addAll(getInventoryProperties());
+
         return list;
     }
 
@@ -139,21 +190,70 @@ public class MenuSession {
         return list;
     }
 
-    public boolean onClickPacket(int slot, int button, InventoryClickType mode) {
-        sendPackets(false);
-        menu.onEvent(p,"events.click", ClickType.get(mode,button,slot)+"",(slot+"").replace("-999","out"));
-        menu.getItems().forEach(i-> {
-            if (page.getItemAtSlot(slot) == i)
-                i.getClickActions(button,mode,p,slot,page).forEach(map->map.forEach((ac,str)-> Action.execute(str,ac,p)));
-        });
+    public ItemStack heldItem = ItemStack.b;
+    public int lastClickedSlot = -2;
 
+    public boolean onClickPacket(int slot, int button, InventoryClickType mode, ItemStack held, ItemStack placed) {
+
+        menu.onEvent(p,"events.click", ClickType.get(mode,button,slot)+"",(slot+"").replace("-999","out").replace("-1","border"));
+
+        Item i;
+        boolean equal = heldItem != ItemStack.b && itemsEquals(placed,heldItem);
+        if (equal)
+            i = getSlot(lastClickedSlot);
+        else i = getSlot(slot);
+        Item i2 = getSlot(slot);
+
+        if (!equal && i != null)
+            i.getClickActions(button, mode, p, slot, page).forEach(map -> map.forEach((ac, str) -> Action.execute(str, ac, p)));
+        else {
+            if (i2 != null)
+                i2.getClickActions(button, mode, p, lastClickedSlot, page).forEach(map -> map.forEach((ac, str) -> Action.execute(str, ac, p)));
+        }
+        if ((i == null || i.isMovable()) && slot != -999 && slot != -1) {
+            if (!changeSlots(slot, equal, i, i2, placed, held)) {
+                p.sendPacket(new PacketPlayOutSetSlot(66, -1, slot, held));
+                p.sendPacket(new PacketPlayOutWindowItems(66, 1, lastSentItems, placed), ARMenu.get().getMenuManager());
+                return true;
+            }
+        } else if (slot == -1) {
+            return true;
+        } else sendPackets(false);
+        heldItem = held;
+        lastClickedSlot = slot;
         return true;
+    }
+
+    public boolean changeSlots(int slot, boolean equal, Item i, Item i2, ItemStack placed, ItemStack held) {
+        if (equal)
+            if (i2 == null || i2.isMovable())
+                setSlot(lastClickedSlot,i2,heldItem);
+            else return false;
+        setSlot(slot,i,placed);
+        return true;
+    }
+
+    public boolean itemsEquals(ItemStack placed, ItemStack heldItem) {
+        return Objects.equals(getMeta(placed),getMeta(heldItem));
+    }
+
+    public String getMeta(ItemStack item) {
+        ItemMeta meta = CraftItemStack.getItemMeta(item);
+        if (meta == null) return "";
+        return meta.getPersistentDataContainer().get(ARMenu.get().namespacedKey, PersistentDataType.STRING);
+    }
+
+    public void setSlot(int slot, Item i, ItemStack item) {
+        currentItems.put(slot, i);
+        lastSentItems.set(slot,item);
+    }
+    public Item getSlot(int slot) {
+        return currentItems.get(slot);
     }
 
     public void onMenuButton(int buttonId) {
         InventoryButton button = InventoryButton.get(menu.getType(),buttonId);
         if (button == null) return;
         menu.onEvent(p,"events.click", button.toString(),button.getId()+"");
-
     }
 }

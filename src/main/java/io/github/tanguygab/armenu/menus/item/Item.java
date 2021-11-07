@@ -1,21 +1,19 @@
 package io.github.tanguygab.armenu.menus.item;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.features.layout.SkinManager;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import net.minecraft.world.inventory.InventoryClickType;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -25,21 +23,25 @@ public class Item {
     public final String name;
     public final Map<String,Object> config;
 
-    private final List<String> names;
-    private final List<String> amounts;
-    private final List<String> materials;
-    private final List<List<String>> lores;
-    private final Map<String,List<List<String>>> slots;
+    private List<String> names;
+    private List<String> amounts;
+    private List<String> materials;
+    private List<List<String>> lores;
+    private Map<String,List<List<String>>> slots;
+    private boolean isMovable;
 
     public Item(String name, Map<String,Object> config) {
         this.name = name;
         this.config = config;
 
-        names = getNames();
-        amounts = getAmounts();
-        materials = getMaterials();
-        lores = getLores();
-        slots = getSlots();
+        if (config != null) {
+            names = getNames();
+            amounts = getAmounts();
+            materials = getMaterials();
+            lores = getLores();
+            slots = getSlots();
+            isMovable = (boolean) config.getOrDefault("movable", false);
+        }
     }
 
     public String getConfigName() {
@@ -55,7 +57,7 @@ public class Item {
         return list;
     }
 
-    public List<String> getNames() {
+    protected List<String> getNames() {
         Object name = config.get("name");
         if (name == null) return List.of();
 
@@ -64,7 +66,7 @@ public class Item {
         return (List<String>) name;
     }
 
-    public List<String> getAmounts() {
+    protected List<String> getAmounts() {
         Object amount = config.get("amount");
         if (amount == null) return List.of();
 
@@ -74,7 +76,7 @@ public class Item {
         ((List<?>)amount).forEach(i->list.add(i+""));
         return list;
     }
-    public List<String> getMaterials() {
+    protected List<String> getMaterials() {
         Object mat = config.get("material");
         if (mat == null) return List.of();
 
@@ -83,7 +85,7 @@ public class Item {
         return (List<String>) mat;
     }
 
-    public List<List<String>> getLores() {
+    protected List<List<String>> getLores() {
         if (config.containsKey("lore")) {
             List<?> lore = (List<?>) config.get("lore");
             if (lore.isEmpty()) return List.of(List.of());
@@ -93,7 +95,7 @@ public class Item {
         return List.of(List.of());
     }
 
-    public Map<String,List<List<String>>> getSlots() {
+    protected Map<String,List<List<String>>> getSlots() {
         Map<String,List<List<String>>> map = new HashMap<>();
 
         if (!config.containsKey("slot")) {
@@ -120,6 +122,10 @@ public class Item {
         });
 
         return map;
+    }
+
+    public boolean isMovable() {
+        return isMovable;
     }
 
     public ItemStack getSkull(Object url) {
@@ -153,7 +159,6 @@ public class Item {
         String m = placeholders(materials.get(frame),p,page,slot);
         ItemStack item;
 
-        p.sendMessage(isSkinMat(m)+"",false);
         if (isSkinMat(m)) {
             Object skin = ARMenu.get().getMenuManager().skins.getSkin(m);
             if (skin == null)
@@ -178,6 +183,7 @@ public class Item {
             lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot)));
             meta.setLore(lore);
         }
+        meta.getPersistentDataContainer().set(ARMenu.get().namespacedKey, PersistentDataType.STRING,name+"-"+slot);
         item.setItemMeta(meta);
 
 
@@ -218,5 +224,4 @@ public class Item {
         }
         return list;
     }
-
 }

@@ -6,6 +6,8 @@ import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.PacketPlayOutSetSlot;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class Page {
         this.config = config;
 
         createItems("menu-layout",items);
-        if ((config.containsKey("player-layout") && ((List<String>)config.get("player-layout")).isEmpty()))
+        if (!config.containsKey("player-layout") || ((List<String>)config.get("player-layout")).isEmpty())
             playerInvItems = null;
         else {
             playerInvItems = new ArrayList<>();
@@ -44,8 +46,16 @@ public class Page {
         return menu;
     }
 
+    public int getLayoutSize() {
+        return items.size();
+    }
+
     public List<Item> getItems() {
         return items;
+    }
+
+    public List<Item> getPlayerInvItems() {
+        return playerInvItems;
     }
 
     private void createItems(String path, List<Item> items) {
@@ -82,10 +92,8 @@ public class Page {
 
     public NonNullList<ItemStack> getPlayerInvItems(TabPlayer p, int frame) {
         NonNullList<ItemStack> list = NonNullList.a();
-        if (playerInvItems == null) {
-
-            return list;
-        }
+        if (playerInvItems == null)
+            return null;
         int slot = 0;
         for (Item item : playerInvItems) {
             if (item == null) list.add(ItemStack.b);
@@ -114,19 +122,6 @@ public class Page {
         return packets;
     }
 
-    public Item getItemAtSlot(int slot) {
-        if (slot == -999) return null;
-        int size = menu.getType() != null ? menu.getType().getSize() : items.size();
-        if (slot >= size) {
-            slot = slot-size;
-            if (playerInvItems == null || playerInvItems.size() <= slot) return null;
-            return playerInvItems.get(slot);
-        }
-        if (items.size() <= slot) return null;
-        return items.get(slot);
-    }
-
-
     public void onOpen(TabPlayer p) {
         menu.onEvent(p,"pages."+name+".events.open","","");
     }
@@ -134,5 +129,4 @@ public class Page {
     public void onClose(TabPlayer p) {
         menu.onEvent(p,"pages."+name+".events.close","","");
     }
-
 }

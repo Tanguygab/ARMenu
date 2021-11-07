@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
@@ -93,6 +94,7 @@ public class ListItem extends Item{
         //if (vertical) {}
 
         int pos = l.indexOf(page.getName()+" ||| "+slot)+currentIncrement.getOrDefault(p,0);
+        if (pos < 0) return new String[]{"0",""};
         String item = "";
         if (pos < list.length)
             item = list[pos];
@@ -139,6 +141,7 @@ public class ListItem extends Item{
             lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot,listPos,listItem)));
             meta.setLore(lore);
         }
+        meta.getPersistentDataContainer().set(ARMenu.get().namespacedKey, PersistentDataType.STRING,name+"-"+slot);
         item.setItemMeta(meta);
 
 

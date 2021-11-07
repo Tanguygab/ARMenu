@@ -8,14 +8,14 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.features.layout.SkinManager;
-import net.minecraft.network.protocol.game.PacketPlayInCloseWindow;
-import net.minecraft.network.protocol.game.PacketPlayInEnchantItem;
-import net.minecraft.network.protocol.game.PacketPlayInWindowClick;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.inventory.InventoryClickType;
+import net.minecraft.world.item.ItemStack;
 import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,9 +116,19 @@ public class MenuManager extends TabFeature {
             int slot = click.c();
             int button = click.d();
             InventoryClickType mode = click.g();
-            //ItemStack item = click.e();
-            //Int2ObjectMap<ItemStack> menuitems = click.f(); keeping this to know what it is in case I need it x)
-            return session.onClickPacket(slot,button,mode);
+            ItemStack item = click.e();
+            Object changedItems = click.f(); //keeping this to know what it is in case I need it x)
+            // can't use directly because Paper doesn't have these methods because they can't use MC's code or smth =/
+
+            if (mode.toString().equals("SWAP") && button == 40) {
+                p.sendMessage("offhand swap detected",false);
+                p.sendPacket(new PacketPlayOutSetSlot(-2,-1,45,ItemStack.b),this);
+            }
+            ItemStack placed = ItemStack.b;
+            try {placed = (ItemStack) changedItems.getClass().getMethod("getOrDefault", int.class, Object.class).invoke(click.f(),slot,ItemStack.b);}
+            catch (Exception e) {e.printStackTrace();}
+
+            return session.onClickPacket(slot,button,mode,item,placed);
         }
         if (packet instanceof PacketPlayInEnchantItem click && click.b() == 66 && (session = sessions.get(p)) != null) {
             int buttonId = click.c();

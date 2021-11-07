@@ -5,6 +5,7 @@ import io.github.tanguygab.armenu.commands.*;
 import io.github.tanguygab.armenu.itemstorage.ItemStorage;
 import io.github.tanguygab.armenu.menus.menu.MenuManager;
 import me.neznamy.tab.api.TabAPI;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,9 +19,12 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
     private MenuManager mm;
     private ItemStorage itemStorage;
 
+    public NamespacedKey namespacedKey;
+
     @Override
     public void onEnable() {
         plugin = this;
+        namespacedKey = new NamespacedKey(this,"armenu-item-id");
         mm = new MenuManager();
         TabAPI.getInstance().getFeatureManager().registerFeature(mm.getFeatureName(),mm);
         itemStorage = new ItemStorage();
@@ -57,7 +61,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
         switch (args[0].toLowerCase()) {
             case "list" -> new ListCmd(sender);
             case "open" -> new OpenCmd(sender,args);
-            case "create" -> sender.sendMessage("create cmd");
+            case "create" -> new CreateCmd(sender,args);
             case "execute" -> new ExecuteCmd(sender,args);
             case "items" -> new ItemCmd(sender, args);
             case "reload" -> new ReloadCmd(sender);

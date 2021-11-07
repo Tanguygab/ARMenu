@@ -45,6 +45,7 @@ public class Menu {
     public InventoryType getType() {
         return type;
     }
+
     public Map<InventoryProperty,Object> getInventoryProperties() {
         return properties;
     }
