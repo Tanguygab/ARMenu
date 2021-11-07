@@ -61,7 +61,6 @@ public class CreateCmd {
     }
 
     public void close() {
-        p.sendMessage(name+"|"+items,false);
         try {
             File file = new File(ARMenu.get().getDataFolder(),"/menus/"+name+".yml");
             file.createNewFile();
@@ -73,6 +72,7 @@ public class CreateCmd {
             config.set("type",type.name.get(0));
             for (int slot : items.keySet()) {
                 ItemStack item = items.get(slot);
+                if (item == ItemStack.b) continue;
                 chars.put(slot,c);
                 org.bukkit.inventory.ItemStack i = CraftItemStack.asBukkitCopy(item);
                 config.set("items."+c+".material",i.getType().toString());
@@ -82,7 +82,7 @@ public class CreateCmd {
                 c++;
             }
 
-            List<String> layout = config.getStringList("layout", new ArrayList<>());
+            List<String> layout = new ArrayList<>();
             for (int i = 0; i < type.getSize(); i++) {
                 String ch = chars.containsKey(i) ? chars.get(i)+"" : "";
 
@@ -92,7 +92,7 @@ public class CreateCmd {
                 if (i < 36) setChatToLayout(ch,3,layout);
                 if (i < 45) setChatToLayout(ch,4,layout);
                 if (i < 54) setChatToLayout(ch,5,layout);
-
+                config.set("layout",layout);
             }
         } catch (IOException e) {
             e.printStackTrace();
