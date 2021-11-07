@@ -10,6 +10,7 @@ import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,23 +104,22 @@ public class Page {
         return list;
     }
 
-    public List<PacketPlayOutSetSlot> getSetSlots(TabPlayer p, int frame) {
-        List<PacketPlayOutSetSlot> packets = new ArrayList<>();
+    public Map<Item,List<Integer>> getSetSlots(TabPlayer p, int frame) {
+        Map<Item,List<Integer>> map = new HashMap<>();
 
-        setslots.forEach(item->{
-            item.getSlots(this).forEach(list->{
-                String slot = list.get(frame);
-                if (slot == null) return;
-                slot = Utils.parsePlaceholders(slot,p);
-                try {
-                    int i = Integer.parseInt(slot);
-                    packets.add(new PacketPlayOutSetSlot(66,0,i,item.getItem(frame, p, this, i)));
-                } catch (Exception ignored) {}
-
-            });
-        });
-
-        return packets;
+        setslots.forEach(item->
+                item.getSlots(this).forEach(list->{
+                    String slot = list.get(frame);
+                    if (slot == null) return;
+                    slot = Utils.parsePlaceholders(slot,p);
+                    try {
+                        int i = Integer.parseInt(slot);
+                        List<Integer> l = map.getOrDefault(item,new ArrayList<>());
+                        l.add(i);
+                        map.put(item,l);
+                    } catch (Exception ignored) {}
+        }));
+        return map;
     }
 
     public void onOpen(TabPlayer p) {

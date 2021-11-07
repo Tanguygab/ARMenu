@@ -156,21 +156,23 @@ public class MenuSession {
 
         List<Packet<PacketListenerPlayOut>> list = new ArrayList<>();
 
-
         IChatBaseComponent title = IChatBaseComponent.a(menu.getTitles().get(frame));
         InventoryType type = menu.getType() != null ? menu.getType() : InventoryType.get("" + page.getLayoutSize());
         if (type == null)
             type = InventoryType.NORMAL_54;
         list.add(new PacketPlayOutOpenWindow(66, type.container, title));
 
-
         NonNullList<ItemStack> pageItems = NonNullList.a();
+
+        page.getSetSlots(p,frame).forEach((item,slots)-> slots.forEach(slot-> currentItems.put(slot,item)));
+
         currentItems.forEach((slot, item) -> {
             if (item != null)
                 pageItems.add(item.getItem(frame, p, page, slot));
             else pageItems.add(ItemStack.b);
         });
         lastSentItems = pageItems;
+
 
         list.add(new PacketPlayOutWindowItems(66, 1, pageItems, ItemStack.b));
 
