@@ -11,6 +11,7 @@ import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryType;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.task.RepeatingTask;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
@@ -28,6 +29,7 @@ public class MenuSession {
 
     private final TabPlayer p;
     private final Menu menu;
+    private RepeatingTask task;
 
     private Page page;
     private List<Packet<PacketListenerPlayOut>> lastSentPacket = null;
@@ -77,21 +79,24 @@ public class MenuSession {
 
         setPage(new ArrayList<>(menu.getPages().values()).get(0));
 
-        //TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,"refreshing ARMenu menu for player "+p.getName(),ARMenu.get().getMenuManager(),"refreshing",()->{
-
-        //});
+        task = TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,"refreshing ARMenu menu for player "+p.getName(),ARMenu.get().getMenuManager(),"refreshing",()->{
+            sendPackets(true);
+        });
     }
 
-    public void closeMenu() {
-        p.sendPacket(new PacketPlayOutCloseWindow(66));
+    public void forceCloseMenu() {
+        task.cancel();
+        TabAPI.getInstance().getThreadManager().runTaskLater(100,"closing menu for "+p.getName(),()->{
+            p.sendPacket(new PacketPlayOutCloseWindow(66));
+            ((Player)p.getPlayer()).updateInventory();
+        });
         ARMenu.get().getMenuManager().sessions.remove(p);
         p.setProperty(ARMenu.get().getMenuManager(),"armenu",menu.getName());
     }
 
-    public void onClosePacket() {
+    public void onClose() {
         if (menu.onClose(p)) {
-            ARMenu.get().getMenuManager().sessions.remove(p);
-            p.setProperty(ARMenu.get().getMenuManager(),"armenu","");
+            forceCloseMenu();
             return;
         }
         if (lastSentPacket != null)

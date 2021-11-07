@@ -150,8 +150,7 @@ public class MenuManager extends TabFeature {
             return true;
         }
         if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66 && (session = sessions.get(p)) != null) {
-            session.onClosePacket();
-            ((Player)p.getPlayer()).updateInventory();
+            session.onClose();
         }
         return false;
     }

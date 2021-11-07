@@ -29,7 +29,10 @@ public class CloseAction extends Action {
     @Override
     public void execute(String match, TabPlayer p) {
         MenuSession session;
-        if (p != null && (session = ARMenu.get().getMenuManager().sessions.get(p)) != null)
-            session.closeMenu();
+        if (p != null && (session = ARMenu.get().getMenuManager().sessions.get(p)) != null) {
+            if (Boolean.parseBoolean(match))
+                session.forceCloseMenu();
+            else session.onClose();
+        }
     }
 }
