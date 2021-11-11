@@ -12,7 +12,7 @@ public class    ListCmd {
         List<String> list = ARMenu.get().getMenuManager().getMenus();
         String txt = "&aList of menus &8(&7"+list.size()+"&8)&a:";
         for (String menu : list) {
-            txt = txt + "\n - &3"+menu;
+            txt = txt + "\n &8- &3"+menu;
         }
         Utils.senderMsg(p,txt);
     }
