@@ -8,11 +8,6 @@ import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import net.minecraft.world.inventory.InventoryClickType;
-import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
@@ -99,11 +94,24 @@ public class ListItem extends Item {
         Map<String,String> enchants = new HashMap<>(this.enchants);
         enchants.forEach((enchant,lvl)->enchants.put(placeholders(enchant,p,page,slot,listPos,listItem),placeholders(lvl,p,page,slot,listPos,listItem)));
 
+        List<String> flags = new ArrayList<>(this.flags);
+        flags.forEach(flag->flags.set(flags.indexOf(flag),placeholders(flag,p,page,slot,listPos,listItem)));
+
+        Map<String,Map<String,String>> attributes = new HashMap<>(this.attributes);
+        attributes.forEach((attribute,cfg)->{
+            cfg.forEach((opt,value)->{
+                cfg.put(placeholders(opt,p,page,slot),placeholders(value,p,page,slot));
+            });
+            attributes.put(placeholders(attribute,p,page,slot),cfg);
+        });
+
         return getItem(placeholders(materials.get(frame),p,page,slot,listPos,listItem),
                 names.isEmpty() ? null : placeholders(names.get(frame),p,page,slot,listPos,listItem),
                 amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,page,slot,listPos,listItem),
                 lore,
                 enchants,
+                flags,
+                attributes,
                 slot
                 );
     }

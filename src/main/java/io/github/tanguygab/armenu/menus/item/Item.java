@@ -11,8 +11,12 @@ import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import net.minecraft.world.inventory.InventoryClickType;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -31,6 +35,8 @@ public class Item {
     protected List<List<String>> lores;
     protected Map<String,List<List<String>>> slots;
     protected Map<String,String> enchants;
+    protected List<String> flags;
+    protected Map<String,Map<String,String>> attributes;
     protected boolean isMovable;
 
     public Item(String name, Map<String,Object> config) {
@@ -44,6 +50,8 @@ public class Item {
             lores = getLores();
             slots = getSlots();
             enchants = getEnchants();
+            flags = getFlags();
+            attributes = getAttributes();
             isMovable = (boolean) config.getOrDefault("movable", false);
         }
     }
@@ -94,7 +102,7 @@ public class Item {
             List<?> lore = (List<?>) config.get("lore");
             if (lore.isEmpty()) return List.of(List.of());
             if (lore.get(0) instanceof List<?>) return (List<List<String>>) lore;
-            else return List.of((List<String>)lore);
+            return List.of((List<String>)lore);
         }
         return List.of(List.of());
     }
@@ -131,11 +139,29 @@ public class Item {
     protected Map<String,String> getEnchants() {
         if (config.containsKey("enchantments")) {
             Map<String,Object> enchantments = (Map<String,Object>) config.get("enchantments");
-            if (enchantments.isEmpty()) return Map.of();
+            if (enchantments == null || enchantments.isEmpty()) return Map.of();
 
             Map<String,String> output = new HashMap<>();
             enchantments.forEach((enchant,lvl)-> output.put(enchant,lvl+""));
             return output;
+        }
+        return Map.of();
+    }
+
+    protected List<String> getFlags() {
+        if (config.containsKey("flags")) {
+            List<String> flags = (List<String>) config.get("flags");
+            if (flags == null || flags.isEmpty()) return List.of();
+            return flags;
+        }
+        return List.of();
+    }
+
+    protected Map<String,Map<String,String>> getAttributes() {
+        if (config.containsKey("attributes")) {
+            Map<String,Map<String,String>> attributes = (Map<String,Map<String,String>>) config.get("attributes");
+            if (attributes == null || attributes.isEmpty()) return Map.of();
+            return attributes;
         }
         return Map.of();
     }
@@ -178,16 +204,29 @@ public class Item {
         Map<String,String> enchants = new HashMap<>(this.enchants);
         enchants.forEach((enchant,lvl)->enchants.put(placeholders(enchant,p,page,slot),placeholders(lvl,p,page,slot)));
 
+        List<String> flags = new ArrayList<>(this.flags);
+        flags.forEach(flag->flags.set(flags.indexOf(flag),placeholders(flag,p,page,slot)));
+
+        Map<String,Map<String,String>> attributes = new HashMap<>(this.attributes);
+        attributes.forEach((attribute,cfg)->{
+            cfg.forEach((opt,value)->{
+                cfg.put(placeholders(opt,p,page,slot),placeholders(value,p,page,slot));
+            });
+            attributes.put(placeholders(attribute,p,page,slot),cfg);
+        });
+
         return getItem(placeholders(materials.get(frame),p,page,slot),
                 names.isEmpty() ? null : placeholders(names.get(frame),p,page,slot),
                 amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,page,slot),
                 lore,
                 enchants,
+                flags,
+                attributes,
                 slot
         );
     }
 
-    public net.minecraft.world.item.ItemStack getItem(String mat, String name, String amt, List<String> lore, Map<String,String> enchants, int slot) {
+    public net.minecraft.world.item.ItemStack getItem(String mat, String name, String amount, List<String> lore, Map<String,String> enchants, List<String> flags, Map<String,Map<String,String>> attributes, int slot) {
         ItemStack item;
 
         if (isSkinMat(mat)) {
@@ -201,11 +240,15 @@ public class Item {
             item = new ItemStack(m2);
         }
 
-        try {item.setAmount(Math.round(Float.parseFloat(amt)));}
+        try {item.setAmount(Math.round(Float.parseFloat(amount)));}
         catch (Exception ignored) {}
 
         ItemMeta meta = item.getItemMeta();
         assert meta != null;
+
+        if (name != null) meta.setDisplayName(name);
+        if (!lore.isEmpty()) meta.setLore(lore);
+
         if (!enchants.isEmpty()) enchants.forEach((enchant,lvl)->{
             Enchantment e = Enchantment.getByKey(NamespacedKey.minecraft(enchant.toLowerCase().replace(" ","_")));
             if (e == null) return;
@@ -216,10 +259,25 @@ public class Item {
             } catch (Exception ignored) {}
         });
 
+        if (!flags.isEmpty()) flags.forEach(flag->{
+            try {
+                ItemFlag f = ItemFlag.valueOf(flag.toUpperCase().replace(" ", "_"));
+                meta.addItemFlags(f);
+            } catch (Exception ignored) {}
+        });
 
-        if (name != null) meta.setDisplayName(name);
-        if (!lore.isEmpty()) meta.setLore(lore);
+        if (!attributes.isEmpty()) attributes.forEach((attribute,cfg)->{
+            try {
+                Attribute att = Attribute.valueOf(attribute.toUpperCase().replace(" ", "_"));
 
+                EquipmentSlot s = EquipmentSlot.valueOf(cfg.get("slot").toUpperCase().replace(" ","_"));
+                int fAmt = Integer.parseInt(cfg.get("amount"));
+
+                String type = cfg.get("type").toUpperCase().replace(" ","_");
+                AttributeModifier.Operation operation = AttributeModifier.Operation.valueOf(type);
+                meta.addAttributeModifier(att, new AttributeModifier(UUID.randomUUID(), attribute,fAmt, operation, s));
+            } catch (Exception ignored) {}
+        });
 
         meta.getPersistentDataContainer().set(ARMenu.get().namespacedKey, PersistentDataType.STRING,name+"-"+slot);
         item.setItemMeta(meta);
