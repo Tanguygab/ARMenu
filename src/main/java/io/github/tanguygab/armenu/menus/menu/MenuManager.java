@@ -8,11 +8,10 @@ import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.features.layout.SkinManager;
+import me.neznamy.tab.shared.features.layout.skin.SkinManager;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
