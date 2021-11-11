@@ -41,26 +41,19 @@ public class OpenAction extends Action {
 
         if (!closed) return;
 
-        p.sendMessage("hi"+match,false);
-
         String[] args = match.split(" ");
 
         String[] menupage = args[0].split(":");
         String menu = menupage[0];
         Menu m = mm.getMenu(menu);
-        p.sendMessage("hi"+ Arrays.toString(args),false);
         if (m == null) return;
 
         String page = menupage.length > 1 ? menupage[1] : null;
         Page mp = m.getPages().get(page);
-        p.sendMessage("hi"+mp,false);
 
         List<String> menuArgs = null;
         if (args.length > 1)
             menuArgs = (Arrays.asList(args).subList(1, args.length));
-
-
-        p.sendMessage("hi"+menuArgs,false);
 
         mm.newMenuSession(p,m,mp,menuArgs);
     }
