@@ -155,6 +155,7 @@ public class MenuSession {
         } else {
             playerInventoryOnOpen.forEach((slot,i)->currentItems.put(slot+size,i));
         }
+        page.onOpen(p);
         sendPackets(true);
     }
 
@@ -175,7 +176,6 @@ public class MenuSession {
     }
 
     public List<Packet<PacketListenerPlayOut>> getInventoryPackets() {
-        page.onOpen(p);
         int frame = 0;
 
         List<Packet<PacketListenerPlayOut>> list = new ArrayList<>();
