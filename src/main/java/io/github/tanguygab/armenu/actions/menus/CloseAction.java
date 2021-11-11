@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class CloseAction extends Action {
 
-    private final Pattern pattern = Pattern.compile("(i?)close");
+    private final Pattern pattern = Pattern.compile("^(i?)close( true)?$");
 
     @Override
     public Pattern getPattern() {

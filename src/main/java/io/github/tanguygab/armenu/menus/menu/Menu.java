@@ -84,20 +84,22 @@ public class Menu {
             }
         }
 
-        boolean canOpen = true;
+        boolean canProceed = true;
         for (Map<Action,String> map : list) {
             for (Action ac : map.keySet()) {
                 String str = map.get(ac);
                 if (str.equalsIgnoreCase("return")) {
-                    canOpen = false;
+                    canProceed = false;
                     continue;
                 }
+                if (str.equalsIgnoreCase("close") && path.equals("events.close"))
+                    continue;
                 Action.execute(str,ac,p);
             }
         }
 
 
-        return canOpen;
+        return canProceed;
     }
 
 
