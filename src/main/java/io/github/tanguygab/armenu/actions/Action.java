@@ -54,7 +54,9 @@ public abstract class Action {
 
                 new CloseAction(),
                 new InventoryPropertyAction(),
+                new OpenAction(),
                 new RefreshAction(),
+                new SetArgAction(),
                 new SetPageAction(),
                 new SetListAction(),
                 new UpdatePageAction(),

@@ -286,9 +286,16 @@ public class Item {
     }
 
     protected String placeholders(String text, TabPlayer p, Page page, int slot) {
-        return Utils.parsePlaceholders(text
-                .replace("%page%",page.getName())
-                .replace("%slot%",slot+""),p);
+        text = text.replace("%page%",page.getName())
+                .replace("%slot%",slot+"");
+
+        List<String> args = ARMenu.get().getMenuManager().sessions.get(p).getArguments();
+        for (String arg : args)
+            text = text.replace("%arg-"+args.indexOf(arg)+"%",arg);
+        text = text.replace("%args-amount%",args.size()+"")
+                .replace("%args%",String.join(" ",args));
+
+        return Utils.parsePlaceholders(text,p);
     }
 
     public List<Map<Action,String>> getClickActions(int button, InventoryClickType mode, TabPlayer p, int slot, Page page) {

@@ -117,12 +117,10 @@ public class ListItem extends Item {
     }
 
     private String placeholders(String text, TabPlayer p, Page page, Integer slot, String listPos, String listItem) {
-        return Utils.parsePlaceholders(text
-                .replace("%page%", page.getName())
-                .replace("%slot%",slot+"")
+        return placeholders(text
                 .replace("%list-pos%", listPos+"")
                 .replace("%list-item%", listItem)
-                ,p);
+                ,p,page,slot);
     }
     @Override
     public List<Map<Action,String>> getClickActions(int button, InventoryClickType mode, TabPlayer p, int slot, Page page) {

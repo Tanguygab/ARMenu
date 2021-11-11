@@ -81,15 +81,13 @@ public class MenuManager extends TabFeature {
     }
 
     public void newMenuSession(TabPlayer p, Menu menu) {
-        MenuSession session = new MenuSession(p,menu);
-        ARMenu.get().getMenuManager().sessions.put(p,session);
-        session.openMenu();
+        newMenuSession(p,menu,null, null);
     }
 
-    public Menu getMenu(TabPlayer p) {
-        String menuproperty = p.getProperty("armenu").get();
-        if (menuproperty == null || menuproperty.equals("")) return null;
-        return getMenu(menuproperty);
+    public void newMenuSession(TabPlayer p, Menu menu, Page page, List<String> args) {
+        MenuSession session = new MenuSession(p,menu,page,args);
+        ARMenu.get().getMenuManager().sessions.put(p,session);
+        session.openMenu();
     }
 
     @Override

@@ -32,6 +32,7 @@ public class MenuSession {
     private RepeatingTask task;
 
     private Page page;
+    private final List<String> arguments;
     private List<Packet<PacketListenerPlayOut>> lastSentPacket = null;
     private NonNullList<ItemStack> lastSentItems = null;
     private final List<PacketPlayOutWindowData> customInventoryProperties = new ArrayList<>();
@@ -40,9 +41,11 @@ public class MenuSession {
 
     public final Map<Integer,Item> playerInventoryOnOpen = new HashMap<>();
 
-    public MenuSession(TabPlayer p, Menu menu) {
+    public MenuSession(TabPlayer p, Menu menu, Page page, List<String> args) {
         this.p = p;
         this.menu = menu;
+        this.page = page;
+        this.arguments = args != null ? args : new ArrayList<>();
     }
 
     public TabPlayer getPlayer() {
@@ -53,6 +56,15 @@ public class MenuSession {
     }
     public Page getPage() {
         return page;
+    }
+    public List<String> getArguments() {
+        return arguments;
+    }
+    public String getArgument(int i) {
+        return arguments.size() > i ? arguments.get(i) : "";
+    }
+    public void setArgument(int i, String arg) {
+        if (arguments.size() > i) arguments.set(i,arg);
     }
 
     public void openMenu() {
@@ -77,7 +89,13 @@ public class MenuSession {
         for (int i = 0; i < list.size(); i++)
             playerInventoryOnOpen.put(i,list.get(i));
 
-        setPage(new ArrayList<>(menu.getPages().values()).get(0));
+        if (page == null)
+            setPage(new ArrayList<>(menu.getPages().values()).get(0));
+        else { // otherwise it doesn't send the packets D:
+            Page newPage = page;
+            page = null;
+            setPage(newPage);
+        }
 
         task = TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,"refreshing ARMenu menu for player "+p.getName(),ARMenu.get().getMenuManager(),"refreshing",()->{
             sendPackets(true);
@@ -94,13 +112,14 @@ public class MenuSession {
         p.setProperty(ARMenu.get().getMenuManager(),"armenu",menu.getName());
     }
 
-    public void onClose() {
+    public boolean onClose() {
         if (menu.onClose(p)) {
             forceCloseMenu();
-            return;
+            return true;
         }
         if (lastSentPacket != null)
             sendPackets(true);
+        return false;
     }
 
     public void sendPackets(boolean refresh) {

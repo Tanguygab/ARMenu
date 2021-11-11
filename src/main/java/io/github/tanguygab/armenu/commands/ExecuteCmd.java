@@ -7,6 +7,8 @@ import me.neznamy.tab.shared.TAB;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
+import java.util.Arrays;
+
 public class ExecuteCmd {
 
     public ExecuteCmd(CommandSender sender, String[] args) {
@@ -19,15 +21,8 @@ public class ExecuteCmd {
             return;
         }
         TabPlayer p = TAB.getInstance().getPlayer(args[1]);
-        int i = 0;
-        String action = "";
-        for (String str : args) {
-            if (i > 1)
-                action = action + " " + str;
-            i++;
-        }
+        String action = String.join(" ",Arrays.asList(args).subList(2, args.length));
 
-        String finalAction = action;
-        Bukkit.getServer().getScheduler().runTaskAsynchronously(ARMenu.get(),()->Action.findAndExecute(finalAction,p));
+        Bukkit.getServer().getScheduler().runTaskAsynchronously(ARMenu.get(),()->Action.findAndExecute(action,p));
     }
 }
