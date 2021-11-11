@@ -27,7 +27,7 @@ public enum ClickType {
     MIDDLE_CLICK(InventoryClickType.d,2,-1,"middle","middle_click"),
 
     DROP_KEY(InventoryClickType.e,0,-1,"drop","drop_key"),
-    CONTROL_DROP_KEY(InventoryClickType.e,1,-1,"ctrl_draop","control_drop_key"),
+    CONTROL_DROP_KEY(InventoryClickType.e,1,-1,"ctrl_drop","control_drop_key"),
     //apparently those two are here... weird that https://wiki.vg/Protocol#Click_Window says that it's inside the first mode
     LEFT_CLICK_OUT(InventoryClickType.e,0,-999,"left_out","right_click_out"),
     RIGHT_CLICK_OUT(InventoryClickType.e,1,-999,"right_out","right_click_out"),
