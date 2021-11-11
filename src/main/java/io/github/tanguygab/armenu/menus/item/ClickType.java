@@ -11,7 +11,7 @@ public enum ClickType {
     RIGHT_CLICK(InventoryClickType.a,1,-1,"right","right_click"),
 
     SHIFT_lEFT_CLICK(InventoryClickType.b,0,-1,"shift_left","shift_left_click"),
-    SHIFT_RIGHT_CLICK(InventoryClickType.b,1,-1,"shift_rigt","shift_right_click"),
+    SHIFT_RIGHT_CLICK(InventoryClickType.b,1,-1,"shift_right","shift_right_click"),
 
     NUMPAD_1(InventoryClickType.c,0,-1,"num_1","numpad_1"),
     NUMPAD_2(InventoryClickType.c,1,-1,"num_2","numpad_2"),
