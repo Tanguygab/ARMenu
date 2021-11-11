@@ -54,6 +54,7 @@ public enum ClickType {
     }
 
     public static ClickType get(String name) {
+        name = name.toLowerCase().replace(" ","_");
         for (ClickType type : values()) {
             if (type.getNames().contains(name))
                 return type;
