@@ -10,7 +10,9 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import net.minecraft.world.inventory.InventoryClickType;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -23,12 +25,13 @@ public class Item {
     public final String name;
     public final Map<String,Object> config;
 
-    private List<String> names;
-    private List<String> amounts;
-    private List<String> materials;
-    private List<List<String>> lores;
-    private Map<String,List<List<String>>> slots;
-    private boolean isMovable;
+    protected List<String> names;
+    protected List<String> amounts;
+    protected List<String> materials;
+    protected List<List<String>> lores;
+    protected Map<String,List<List<String>>> slots;
+    protected Map<String,String> enchants;
+    protected boolean isMovable;
 
     public Item(String name, Map<String,Object> config) {
         this.name = name;
@@ -40,6 +43,7 @@ public class Item {
             materials = getMaterials();
             lores = getLores();
             slots = getSlots();
+            enchants = getEnchants();
             isMovable = (boolean) config.getOrDefault("movable", false);
         }
     }
@@ -124,6 +128,18 @@ public class Item {
         return map;
     }
 
+    protected Map<String,String> getEnchants() {
+        if (config.containsKey("enchantments")) {
+            Map<String,Object> enchantments = (Map<String,Object>) config.get("enchantments");
+            if (enchantments.isEmpty()) return Map.of();
+
+            Map<String,String> output = new HashMap<>();
+            enchantments.forEach((enchant,lvl)-> output.put(enchant,lvl+""));
+            return output;
+        }
+        return Map.of();
+    }
+
     public boolean isMovable() {
         return isMovable;
     }
@@ -156,36 +172,57 @@ public class Item {
     public net.minecraft.world.item.ItemStack getItem(int frame, TabPlayer p, Page page, int slot) {
         if (materials.isEmpty()) return net.minecraft.world.item.ItemStack.b;
 
-        String m = placeholders(materials.get(frame),p,page,slot);
+        List<String> lore = new ArrayList<>(this.lores.get(frame));
+        lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot)));
+
+        Map<String,String> enchants = new HashMap<>(this.enchants);
+        enchants.forEach((enchant,lvl)->enchants.put(placeholders(enchant,p,page,slot),placeholders(lvl,p,page,slot)));
+
+        return getItem(placeholders(materials.get(frame),p,page,slot),
+                names.isEmpty() ? null : placeholders(names.get(frame),p,page,slot),
+                amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,page,slot),
+                lore,
+                enchants,
+                slot
+        );
+    }
+
+    public net.minecraft.world.item.ItemStack getItem(String mat, String name, String amt, List<String> lore, Map<String,String> enchants, int slot) {
         ItemStack item;
 
-        if (isSkinMat(m)) {
-            Object skin = ARMenu.get().getMenuManager().skins.getSkin(m);
+        if (isSkinMat(mat)) {
+            Object skin = ARMenu.get().getMenuManager().skins.getSkin(mat);
             if (skin == null)
                 return net.minecraft.world.item.ItemStack.b;
             item = getSkull(skin);
         } else {
-            Material m2 = Material.getMaterial(m.replace(" ", "_").toUpperCase());
+            Material m2 = Material.getMaterial(mat.replace(" ", "_").toUpperCase());
             if (m2 == null) return net.minecraft.world.item.ItemStack.b;
             item = new ItemStack(m2);
         }
 
-        if (!amounts.isEmpty()) {
-            String amount = placeholders(amounts.get(frame),p,page,slot);
-            try {item.setAmount(Math.round(Float.parseFloat(amount)));}
-            catch (Exception ignored) {}
-        }
+        try {item.setAmount(Math.round(Float.parseFloat(amt)));}
+        catch (Exception ignored) {}
+
         ItemMeta meta = item.getItemMeta();
-        if (!names.isEmpty())
-            meta.setDisplayName(placeholders(names.get(frame),p,page,slot));
-        if (!lores.isEmpty()) {
-            List<String> lore = new ArrayList<>(lores.get(frame));
-            lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot)));
-            meta.setLore(lore);
-        }
+        assert meta != null;
+        if (!enchants.isEmpty()) enchants.forEach((enchant,lvl)->{
+            Enchantment e = Enchantment.getByKey(NamespacedKey.minecraft(enchant.toLowerCase().replace(" ","_")));
+            if (e == null) return;
+
+            try {
+                int l = Integer.parseInt(lvl);
+                meta.addEnchant(e, l, true);
+            } catch (Exception ignored) {}
+        });
+
+
+        if (name != null) meta.setDisplayName(name);
+        if (!lore.isEmpty()) meta.setLore(lore);
+
+
         meta.getPersistentDataContainer().set(ARMenu.get().namespacedKey, PersistentDataType.STRING,name+"-"+slot);
         item.setItemMeta(meta);
-
 
         return CraftItemStack.asNMSCopy(item);
     }

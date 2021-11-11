@@ -16,13 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
-public class ListItem extends Item{
-
-    private final List<String> names;
-    private final List<String> amounts;
-    private final List<String> materials;
-    private final List<List<String>> lores;
-    private final Map<String,List<List<String>>> slots;
+public class ListItem extends Item {
 
     private int autoIncrement = 0;
     private boolean loop = false;
@@ -33,22 +27,7 @@ public class ListItem extends Item{
 
     public ListItem(String name, Map<String,Object> config) {
         super(name,config);
-        names = getNames();
-        amounts = getAmounts();
-        materials = getMaterials();
-        lores = getLores();
-        slots = getSlots();
         getList();
-    }
-
-    @Override
-    public List<List<String>> getSlots(Page page) {
-        List<List<String>> list = new ArrayList<>();
-        if (slots.containsKey(page.getName()))
-            list.addAll(slots.get(page.getName()));
-        if (slots.containsKey("__ALL__"))
-            list.addAll(slots.get("__ALL__"));
-        return list;
     }
 
     private void getList() {
@@ -114,38 +93,19 @@ public class ListItem extends Item{
         String listPos = list[0];
         String listItem = list[1];
 
-        String m = placeholders(materials.get(frame),p,page,slot,listPos,listItem);
-        ItemStack item;
+        List<String> lore = new ArrayList<>(this.lores.get(frame));
+        lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot,listPos,listItem)));
 
-        if (isSkinMat(m)) {
-            Object skin = ARMenu.get().getMenuManager().skins.getSkin(m);
-            if (skin == null)
-                return net.minecraft.world.item.ItemStack.b;
-            item = getSkull(skin);
-        } else {
-            Material m2 = Material.getMaterial(m.replace(" ", "_").toUpperCase());
-            if (m2 == null) return net.minecraft.world.item.ItemStack.b;
-            item = new ItemStack(m2);
-        }
+        Map<String,String> enchants = new HashMap<>(this.enchants);
+        enchants.forEach((enchant,lvl)->enchants.put(placeholders(enchant,p,page,slot,listPos,listItem),placeholders(lvl,p,page,slot,listPos,listItem)));
 
-        if (!amounts.isEmpty()) {
-            String amount = placeholders(amounts.get(frame),p,page,slot,listPos,listItem);
-            try {item.setAmount(Math.round(Float.parseFloat(amount)));}
-            catch (Exception ignored) {}
-        }
-        ItemMeta meta = item.getItemMeta();
-        if (!names.isEmpty())
-            meta.setDisplayName(placeholders(names.get(frame),p,page,slot,listPos,listItem));
-        if (!lores.isEmpty()) {
-            List<String> lore = new ArrayList<>(lores.get(frame));
-            lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot,listPos,listItem)));
-            meta.setLore(lore);
-        }
-        meta.getPersistentDataContainer().set(ARMenu.get().namespacedKey, PersistentDataType.STRING,name+"-"+slot);
-        item.setItemMeta(meta);
-
-
-        return CraftItemStack.asNMSCopy(item);
+        return getItem(placeholders(materials.get(frame),p,page,slot,listPos,listItem),
+                names.isEmpty() ? null : placeholders(names.get(frame),p,page,slot,listPos,listItem),
+                amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,page,slot,listPos,listItem),
+                lore,
+                enchants,
+                slot
+                );
     }
 
     private String placeholders(String text, TabPlayer p, Page page, Integer slot, String listPos, String listItem) {
