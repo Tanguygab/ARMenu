@@ -52,5 +52,38 @@
     }
   ],
 
-  "changelog": []
+  "changelog": [
+    "First release",
+    "<font color=\"#F0000\"TAB 3.0.0 is required</font>",
+    "",
+    "Current Features:",
+    "- Menus (obviously :D)",
+    "  * Menu Type (with actual support for non-chest types' buttons and icons)",
+    "  * Menu Title",
+    "  * Pages",
+    "  * Custom Menu Layout & Player Inventory Layout",
+    "  * On Open/Click/Close actions",
+    "  * Custom commands",
+    "- Items",
+    "  * Name",
+    "  * Material: normal item, Player head, MineSkin head, Texture",
+    "  * Amount",
+    "  * Slots",
+    "  * Actions",
+    "  * Movable items",
+    "  * Item Enchantments",
+    "  * Item Flags",
+    "  * Item Attributes",
+    "  * Item Type: Normal item, List",
+    "- Lots of actions",
+    "- Fully packet based",
+    "",
+    "Planned Features:",
+    "- Item Storage",
+    "- Data actions",
+    "- Oraxen material",
+    "- Drag&Drop item type",
+    "- Fix /armenu create's layout :/",
+    "- Input action"
+  ]
 }
