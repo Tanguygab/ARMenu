@@ -5,6 +5,7 @@ import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 public class InvItem extends Item {
 
-    private final org.bukkit.inventory.ItemStack itemStack;
+    public final org.bukkit.inventory.ItemStack itemStack;
 
     public InvItem(org.bukkit.inventory.ItemStack item, int slot) {
         super("inv-"+slot,null);
@@ -29,8 +30,19 @@ public class InvItem extends Item {
         return true;
     }
 
+    public InvItem split(int amount, int slot) {
+        org.bukkit.inventory.ItemStack newItemStack = itemStack.clone();
+        if (newItemStack.getType() != Material.AIR)
+            newItemStack.setAmount(amount);
+        return new InvItem(newItemStack,slot);
+    }
+
     @Override
     public ItemStack getItem(int frame, TabPlayer p, Page page, int slot) {
+        return getItem();
+    }
+
+    public ItemStack getItem() {
         return CraftItemStack.asNMSCopy(itemStack);
     }
 

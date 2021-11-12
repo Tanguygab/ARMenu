@@ -128,16 +128,7 @@ public class MenuManager extends TabFeature {
             int button = click.d();
             InventoryClickType mode = click.g();
             ItemStack item = click.e();
-            Object changedItems = click.f(); //keeping this to know what it is in case I need it x)
-            // can't use directly because Paper doesn't have these methods because they can't use MC's code or smth =/
-
-            if (mode.toString().equals("SWAP") && button == 40) {
-                p.sendMessage("offhand swap detected",false);
-                p.sendPacket(new PacketPlayOutSetSlot(-2,-1,45,ItemStack.b),this);
-            }
-            ItemStack placed = ItemStack.b;
-            try {placed = (ItemStack) changedItems.getClass().getMethod("getOrDefault", int.class, Object.class).invoke(click.f(),slot,ItemStack.b);}
-            catch (Exception e) {e.printStackTrace();}
+            Map<Integer,ItemStack> placed = click.f();
 
             return session.onClickPacket(slot,button,mode,item,placed);
         }
@@ -150,5 +141,13 @@ public class MenuManager extends TabFeature {
             session.onClose();
         }
         return false;
+    }
+
+    @Override
+    public void onPacketSend(TabPlayer p, Object packet) {
+        MenuSession session;
+        if (packet instanceof PacketPlayOutSetSlot pickup && pickup.b() == 0 && (session = sessions.get(p)) != null) {
+            session.pickedUpItem(pickup.c(),pickup.d());
+        }
     }
 }

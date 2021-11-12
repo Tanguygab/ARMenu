@@ -20,8 +20,6 @@ import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
@@ -98,7 +96,7 @@ public class MenuSession {
         }
 
         task = TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,"refreshing ARMenu menu for player "+p.getName(),ARMenu.get().getMenuManager(),"refreshing",()->{
-            sendPackets(true);
+            //sendPackets(true);
         });
     }
 
@@ -125,10 +123,10 @@ public class MenuSession {
     public void sendPackets(boolean refresh) {
         List<Packet<PacketListenerPlayOut>> packets = refresh ? getInventoryPackets() : lastSentPacket;
         MenuManager mm = ARMenu.get().getMenuManager();
-        packets.forEach(packet-> p.sendPacket(packet,mm));
+        packets.forEach(packet->p.sendPacket(packet,mm));
         if (!refresh) {
             if (lastSentItems != null)
-                p.sendPacket(new PacketPlayOutWindowItems(66, 1, lastSentItems, ItemStack.b),mm);
+                p.sendPacket(new PacketPlayOutWindowItems(66, 1, lastSentItems, heldItemStack),mm);
         }
         lastSentPacket = packets;
     }
@@ -197,10 +195,9 @@ public class MenuSession {
         });
         lastSentItems = pageItems;
 
+        list.addAll(getInventoryProperties());
 
         list.add(new PacketPlayOutWindowItems(66, 1, pageItems, ItemStack.b));
-
-        list.addAll(getInventoryProperties());
 
         return list;
     }
@@ -218,65 +215,89 @@ public class MenuSession {
         return list;
     }
 
-    public ItemStack heldItem = ItemStack.b;
+    public ItemStack heldItemStack = ItemStack.b;
+    public Item heldItem = null;
+    public Map<Integer,ItemStack> placedItems = new HashMap<>();
     public int lastClickedSlot = -2;
 
-    public boolean onClickPacket(int slot, int button, InventoryClickType mode, ItemStack held, ItemStack placed) {
+    public boolean onClickPacket(int slot, int button, InventoryClickType mode, ItemStack held, Map<Integer,ItemStack> placed) {
+        menu.onEvent(p, "events.click", ClickType.get(mode, button, slot) + "", (slot + "").replace("-999", "out").replace("-1", "border"));
 
-        menu.onEvent(p,"events.click", ClickType.get(mode,button,slot)+"",(slot+"").replace("-999","out").replace("-1","border"));
-
-        Item i;
-        boolean equal = heldItem != ItemStack.b && itemsEquals(placed,heldItem);
-        if (equal)
-            i = getSlot(lastClickedSlot);
-        else i = getSlot(slot);
-        Item i2 = getSlot(slot);
-
-        if (!equal && i != null)
-            i.getClickActions(button, mode, p, slot, page).forEach(map -> map.forEach((ac, str) -> Action.execute(str, ac, p)));
-        else {
-            if (i2 != null)
-                i2.getClickActions(button, mode, p, lastClickedSlot, page).forEach(map -> map.forEach((ac, str) -> Action.execute(str, ac, p)));
+        if (slot == -999 || slot == -1) {
+            sendPackets(false);
+            return true;
         }
-        if ((i == null || i.isMovable()) && slot != -999 && slot != -1) {
-            if (!changeSlots(slot, equal, i, i2, placed, held)) {
-                p.sendPacket(new PacketPlayOutSetSlot(66, -1, slot, held));
-                p.sendPacket(new PacketPlayOutWindowItems(66, 1, lastSentItems, placed), ARMenu.get().getMenuManager());
+
+        int heldCount = heldItemStack.getCount();
+        placedItems.clear();
+
+        Item currentHeldItem = currentItems.get(slot);
+        if (currentHeldItem != null) {
+            currentHeldItem.getClickActions(button, mode, p, lastClickedSlot, page).forEach(map -> map.forEach((ac, str) -> Action.execute(str, ac, p)));
+            if (!currentHeldItem.isMovable()) {
+                sendPackets(false);
                 return true;
             }
-        } else if (slot == -1) {
-            return true;
-        } else sendPackets(false);
-        heldItem = held;
+        }
+
+
+        placed.forEach((placedSlot, placedItem) -> {
+            Item itemAtSlot = currentItems.get(placedSlot);
+            if (itemAtSlot != null)
+                itemAtSlot.getClickActions(button, mode, p, lastClickedSlot, page).forEach(map -> map.forEach((ac, str) -> Action.execute(str, ac, p)));
+            if (itemAtSlot == null || itemAtSlot.isMovable()) {
+                Item newItem = heldItem;
+                if (heldItem instanceof InvItem item) {
+                    if (item.itemStack != null && item.itemStack.getAmount() != heldCount) {
+                        newItem = item.split(placedItem.getCount(), placedSlot);
+
+                        int amt = heldItemStack.getCount() - placedItem.getCount();
+                        if (amt < 0) amt = 1;
+                        heldItemStack.setCount(amt);
+                    }
+                }
+
+
+
+                currentItems.put(placedSlot, newItem);
+                placedItems.put(placedSlot,placedItem);
+
+                int index = placedSlot-page.getLayoutSize()+9;
+                if (index >= 36 && index < 45) index -= 36;
+
+                ((Player)p.getPlayer()).getInventory().setItem(index,newItem instanceof InvItem i ? i.itemStack : null);
+            }
+        });
+
+        heldItemStack = held;
+        heldItem = currentHeldItem;
         lastClickedSlot = slot;
+        updateLastSentItems();
         return true;
     }
 
-    public boolean changeSlots(int slot, boolean equal, Item i, Item i2, ItemStack placed, ItemStack held) {
-        if (equal)
-            if (i2 == null || i2.isMovable())
-                setSlot(lastClickedSlot,i2,heldItem);
-            else return false;
-        setSlot(slot,i,placed);
-        return true;
+    public void updateLastSentItems() {
+        placedItems.forEach(lastSentItems::set);
+        sendPackets(false);
     }
 
-    public boolean itemsEquals(ItemStack placed, ItemStack heldItem) {
-        return Objects.equals(getMeta(placed),getMeta(heldItem));
-    }
+    //still being worked on
+    public void pickedUpItem(int slot, ItemStack item) {
+        slot += page.getLayoutSize()-9;
+        if (placedItems.containsKey(slot)) return;
 
-    public String getMeta(ItemStack item) {
-        ItemMeta meta = CraftItemStack.getItemMeta(item);
-        if (meta == null) return "";
-        return meta.getPersistentDataContainer().get(ARMenu.get().namespacedKey, PersistentDataType.STRING);
-    }
+        System.out.println("slot "+slot+placedItems);
+        int index = slot-page.getLayoutSize()+9;
+        if (index >= 36 && index < 45) index -= 36;
 
-    public void setSlot(int slot, Item i, ItemStack item) {
-        currentItems.put(slot, i);
-        lastSentItems.set(slot,item);
-    }
-    public Item getSlot(int slot) {
-        return currentItems.get(slot);
+        org.bukkit.inventory.ItemStack bukkitItem = CraftItemStack.asBukkitCopy(item);
+        if (currentItems.get(slot) instanceof InvItem invItem && invItem.itemStack != null && invItem.itemStack.equals(bukkitItem)) {
+            invItem.itemStack.setAmount(invItem.itemStack.getAmount()+bukkitItem.getAmount());
+            placedItems.put(slot,invItem.getItem());
+            updateLastSentItems();
+        } else {
+            p.sendMessage("find empty slot",false);
+        }
     }
 
     public void onMenuButton(int buttonId) {
