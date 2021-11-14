@@ -11,6 +11,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class ARMenu extends JavaPlugin implements CommandExecutor {
@@ -80,7 +81,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
             case "execute" -> {if (args.length == 3) return Action.suggestions;}
             case "items" -> {
                 if (args.length == 2) return List.of("give","take","save","delete","list");
-                if (args.length == 3 && !args[1].equalsIgnoreCase("list")) return itemStorage.getItems();
+                if (args.length == 3 && !args[1].equalsIgnoreCase("list")) return new ArrayList<>(itemStorage.getItems().keySet());
                 if (args.length == 4 && (args[1].equalsIgnoreCase("give") || args[1].equalsIgnoreCase("take")))
                     return List.of("<amount>");
             }

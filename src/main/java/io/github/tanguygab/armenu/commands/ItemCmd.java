@@ -1,7 +1,9 @@
 package io.github.tanguygab.armenu.commands;
 
 import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.itemstorage.ItemStorage;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class ItemCmd {
 
-    private int amt;
     private String name;
     private CommandSender sender;
     private Player p;
@@ -23,7 +24,7 @@ public class ItemCmd {
             sender.sendMessage("You need to provide an action!");
             return;
         }
-        if (args.length < 3) {
+        if (args.length < 3 && !args[1].equals("list")) {
             sender.sendMessage("You need to provide a name!");
             return;
         }
@@ -39,8 +40,7 @@ public class ItemCmd {
             }
         }
         String action = args[1];
-        this.amt = amt;
-        this.name = args[2];
+        this.name = args.length > 2 ? args[2] : "";
         this.sender = sender;
         this.p = p;
 
@@ -48,6 +48,16 @@ public class ItemCmd {
         ItemStack item = is.getItem(name);
         ItemStack hand = p.getInventory().getItemInMainHand();
         switch (action) {
+            case "list" -> {
+                IChatBaseComponent comp = Utils.newComp("&aAll stored items &8(&7"+is.getItems().size()+"&7)&a:");
+                is.getItems().forEach((name,i)->{
+                    IChatBaseComponent itemComp = Utils.newComp("\n &8- &3"+name);
+                    itemComp.getModifier().onHoverShowItem(getItemStack(i));
+                    itemComp.getModifier().onClickSuggestCommand("/armenu items give "+name);
+                    comp.addExtra(itemComp);
+                });
+                TabAPI.getInstance().getPlayer(p.getUniqueId()).sendMessage(comp);
+            }
             case "save" -> {
                 is.saveItem(name,hand);
                 sendMsg("Saved",hand,"");
@@ -61,15 +71,32 @@ public class ItemCmd {
                 else {
                     for (int i = 0; i < amt; i++)
                         p.getInventory().addItem(item);
-                    sendMsg("Gave",item,"to");
+                    sendMsg("Gave "+amt,item,"to");
                 }
             }
             case "take" -> {
                 if (item == null) p.sendMessage("Unknown item");
                 else {
-                    for (int i = 0; i < amt; i++)
-                        p.getInventory().remove(item);
-                    sendMsg("Took",item,"from");
+                    int oldamt = amt;
+                    ItemStack[] items = p.getInventory().getContents();
+                    for (int i = 0; i < items.length; i++) {
+                        if (amt <= 0) break;
+
+                        if (item.isSimilar(items[i])) {
+                            ItemStack found = items[i];
+                            if (found.getAmount() <= amt) {
+                                p.getInventory().setItem(i,null);
+                                amt = amt-found.getAmount();
+                            }
+                            else if (found.getAmount() > amt) {
+                                found.setAmount(found.getAmount()-amt);
+                                amt = 0;
+                            }
+                        }
+
+                    }
+                    p.updateInventory();
+                    sendMsg("Took "+(oldamt-amt),item,"from");
                 }
             }
         }
@@ -77,13 +104,13 @@ public class ItemCmd {
 
     public void sendMsg(String txt, ItemStack item, String txt2) {
         if (sender instanceof Player) {
-            IChatBaseComponent sub = new IChatBaseComponent(name);
+            IChatBaseComponent sub = Utils.newComp(name);
             sub.getModifier().onHoverShowItem(getItemStack(item));
-            IChatBaseComponent comp = new IChatBaseComponent(txt+" "+amt+" ").addExtra(sub);
-            if (!txt2.equals("")) comp.addExtra(new IChatBaseComponent(" "+txt2+" "+p.getName()));
+            IChatBaseComponent comp = Utils.newComp(txt+" ").addExtra(sub);
+            if (!txt2.equals("")) comp.addExtra(Utils.newComp(" "+txt2+" "+p.getName()));
             TAB.getInstance().getPlayer(((Player) sender).getUniqueId()).sendMessage(comp);
         }
-        else sender.sendMessage(txt+" "+amt+" "+name+ (txt2.equals("") ? "" : " "+txt2+" "+p.getName()));
+        else sender.sendMessage(txt+" "+name+ (txt2.equals("") ? "" : " "+txt2+" "+p.getName()));
     }
 
     public String getItemStack(ItemStack item) {

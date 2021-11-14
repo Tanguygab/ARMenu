@@ -4,6 +4,7 @@ import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.EnumChatFormat;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.Placeholder;
 import me.neznamy.tab.shared.placeholders.RelationalPlaceholder;
@@ -16,10 +17,22 @@ import java.util.Map;
 
 public class Utils {
 
-    public static void senderMsg(CommandSender sender, String msg) {
-        if (sender instanceof Player)
-            TAB.getInstance().getPlayer(((Player) sender).getUniqueId()).sendMessage(msg,true);
-        else TAB.getInstance().getPlatform().sendConsoleMessage(msg,true);
+    public static void senderMsg(CommandSender sender, Object msg) {
+        if (sender instanceof Player) {
+            TabPlayer p = TAB.getInstance().getPlayer(((Player) sender).getUniqueId());
+            if (msg instanceof IChatBaseComponent comp)
+                p.sendMessage(comp);
+            else p.sendMessage(msg+"", true);
+        }
+        else {
+            if (msg instanceof IChatBaseComponent comp)
+                msg = comp.toLegacyText();
+            TAB.getInstance().getPlatform().sendConsoleMessage(msg+"",true);
+        }
+    }
+
+    public static IChatBaseComponent newComp(String str) {
+        return IChatBaseComponent.optimizedComponent(EnumChatFormat.color(str));
     }
 
     public static String parsePlaceholders(String str, TabPlayer p) {

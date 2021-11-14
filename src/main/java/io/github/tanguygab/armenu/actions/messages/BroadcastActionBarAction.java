@@ -5,7 +5,6 @@ import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.protocol.PacketPlayOutChat;
 import me.neznamy.tab.api.protocol.TabPacket;
 
@@ -33,7 +32,7 @@ public class BroadcastActionBarAction extends Action {
     @Override
     public void execute(String match, TabPlayer p) {
         match = Utils.parsePlaceholders(match,p);
-        TabPacket packet = new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(match), PacketPlayOutChat.ChatMessageType.GAME_INFO);
+        TabPacket packet = new PacketPlayOutChat(Utils.newComp(match), PacketPlayOutChat.ChatMessageType.GAME_INFO);
         for (TabPlayer all : TabAPI.getInstance().getOnlinePlayers()) {
             all.sendCustomPacket(packet, ARMenu.get().getMenuManager());
         }
