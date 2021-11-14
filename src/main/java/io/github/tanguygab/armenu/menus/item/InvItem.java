@@ -47,7 +47,7 @@ public class InvItem extends Item {
     }
 
     @Override
-    public List<Map<Action, String>> getClickActions(int button, InventoryClickType mode, TabPlayer p, int slot, Page page) {
+    public List<Map<Action, String>> getClickActions(ClickType clickType, TabPlayer p, int slot, Page page) {
         return List.of();
     }
 }

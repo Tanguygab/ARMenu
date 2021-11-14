@@ -306,7 +306,7 @@ public class Item {
         return Utils.parsePlaceholders(text,p);
     }
 
-    public List<Map<Action,String>> getClickActions(int button, InventoryClickType mode, TabPlayer p, int slot, Page page) {
+    public List<Map<Action,String>> getClickActions(ClickType clickType, TabPlayer p, int slot, Page page) {
         List<Map<Action,String>> list = new ArrayList<>();
         Map<String,Object> actions = (Map<String, Object>) config.get("actions");
         if (actions == null) return list;
@@ -318,7 +318,7 @@ public class Item {
                     ARMenu.get().getLogger().info("Click type "+type2+" does not exist! Skipped");
                     continue;
                 }
-                if (click.getMode() != mode || click.getButton() != button) continue;
+                if (click != clickType) continue;
                 for (Object element : (List<Object>) actions.get(type)) {
                     if (element instanceof String el)
                         list.add(Utils.map(el));

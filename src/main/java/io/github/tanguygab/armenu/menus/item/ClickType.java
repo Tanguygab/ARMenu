@@ -34,17 +34,20 @@ public enum ClickType {
     
     START_LEFT_DRAG(InventoryClickType.f,0,-999,"start_left_drag"),
     START_RIGHT_DRAG(InventoryClickType.f,4,-999,"start_right_drag"),
+    START_MIDDLE_DRAG(InventoryClickType.f,8,-999,"start_middle_drag"),
     ADD_LEFT_DRAG(InventoryClickType.f,1,-1,"add_left_drag"),
     ADD_RIGHT_DRAG(InventoryClickType.f,5,-1,"add_right_drag"),
+    ADD_MIDDLE_DRAG(InventoryClickType.f,9,-1,"add_middle_drag"),
     END_LEFT_DRAG(InventoryClickType.f,2,-999,"end_left_drag"),
     END_RIGHT_DRAG(InventoryClickType.f,6,-999,"end_right_drag"),
+    END_MIDDLE_DRAG(InventoryClickType.f,10,-999,"end_middle_drag"),
 
     DOUBLE_CLICK(InventoryClickType.g,0,-1,"double","double_click");
 
-    public InventoryClickType mode;
-    public int button;
-    public int slot;
-    public List<String> names;
+    private final InventoryClickType mode;
+    private final int button;
+    private final int slot;
+    private final List<String> names;
 
     ClickType(InventoryClickType mode, int button, int slot, String... name) {
         this.mode = mode;
@@ -78,10 +81,6 @@ public enum ClickType {
 
     public int getButton() {
         return button;
-    }
-
-    public int getSlot() {
-        return slot;
     }
 
     public List<String> getNames() {

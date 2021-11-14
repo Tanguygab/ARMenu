@@ -2,6 +2,7 @@ package io.github.tanguygab.armenu.menus.menu;
 
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.commands.CreateCmd;
+import io.github.tanguygab.armenu.menus.item.ClickType;
 import me.neznamy.tab.api.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
@@ -128,9 +129,10 @@ public class MenuManager extends TabFeature {
             int button = click.d();
             InventoryClickType mode = click.g();
             ItemStack item = click.e();
-            Map<Integer,ItemStack> placed = click.f();
+            Map<Integer,ItemStack> placed = new HashMap<>(click.f());
 
-            return session.onClickPacket(slot,button,mode,item,placed);
+            ClickType clickType = ClickType.get(mode,button,slot);
+            return session.onClickPacket(slot,clickType,item,placed);
         }
         if (packet instanceof PacketPlayInEnchantItem click && click.b() == 66 && (session = sessions.get(p)) != null) {
             int buttonId = click.c();
@@ -147,7 +149,7 @@ public class MenuManager extends TabFeature {
     public void onPacketSend(TabPlayer p, Object packet) {
         MenuSession session;
         if (packet instanceof PacketPlayOutSetSlot pickup && pickup.b() == 0 && (session = sessions.get(p)) != null) {
-            session.pickedUpItem(pickup.c(),pickup.d());
+            //session.pickedUpItem(pickup.c(),pickup.d());
         }
     }
 }

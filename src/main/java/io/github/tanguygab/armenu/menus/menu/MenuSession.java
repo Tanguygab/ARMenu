@@ -16,7 +16,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
-import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -220,20 +219,54 @@ public class MenuSession {
     public Map<Integer,ItemStack> placedItems = new HashMap<>();
     public int lastClickedSlot = -2;
 
-    public boolean onClickPacket(int slot, int button, InventoryClickType mode, ItemStack held, Map<Integer,ItemStack> placed) {
-        menu.onEvent(p, "events.click", ClickType.get(mode, button, slot) + "", (slot + "").replace("-999", "out").replace("-1", "border"));
+    public void execute(Item item, ClickType click) {
+        if (item == null) return;
+        item.getClickActions(click,p,lastClickedSlot,page)
+                .forEach(map->map
+                        .forEach((ac,str)->Action.execute(str,ac,p)));
+    }
+
+    public boolean onClickPacket(int slot, ClickType click, ItemStack held, Map<Integer,ItemStack> placed) {
+        menu.onEvent(p, "events.click", click+"", (slot + "").replace("-999", "out").replace("-1", "border"));
 
         if (slot == -999 || slot == -1) {
             sendPackets(false);
             return true;
         }
 
+        if (click == ClickType.OFFHAND || click == ClickType.DROP_KEY || click == ClickType.CONTROL_DROP_KEY || click == ClickType.DOUBLE_CLICK) {
+            execute(currentItems.get(slot),click);
+            sendPackets(false);
+            return true;
+        }
+
+
+        if (click.getNames().get(0).startsWith("num_")) {
+            System.out.println(held+" "+placed+ " "+slot);
+            List<Integer> slots = new ArrayList<>(placed.keySet());
+            int slot1 = slots.get(0);
+            int slot2 = slots.get(1);
+            ItemStack itemStack1 = placed.get(slot1);
+            ItemStack itemStack2 = placed.get(slot2);
+            Item item1 = currentItems.get(slot1);
+            Item item2 = currentItems.get(slot2);
+            execute(currentItems.get(slot),click);
+            if ((item1 != null && !item1.isMovable()) || (item2 != null && !item2.isMovable())) {
+                sendPackets(false);
+                return true;
+            }
+
+            System.out.println("hi");
+            return true;
+        }
+
+
         int heldCount = heldItemStack.getCount();
         placedItems.clear();
 
         Item currentHeldItem = currentItems.get(slot);
         if (currentHeldItem != null) {
-            currentHeldItem.getClickActions(button, mode, p, lastClickedSlot, page).forEach(map -> map.forEach((ac, str) -> Action.execute(str, ac, p)));
+            execute(currentHeldItem,click);
             if (!currentHeldItem.isMovable()) {
                 sendPackets(false);
                 return true;
@@ -243,8 +276,8 @@ public class MenuSession {
 
         placed.forEach((placedSlot, placedItem) -> {
             Item itemAtSlot = currentItems.get(placedSlot);
-            if (itemAtSlot != null)
-                itemAtSlot.getClickActions(button, mode, p, lastClickedSlot, page).forEach(map -> map.forEach((ac, str) -> Action.execute(str, ac, p)));
+            execute(itemAtSlot,click);
+
             if (itemAtSlot == null || itemAtSlot.isMovable()) {
                 Item newItem = heldItem;
                 if (heldItem instanceof InvItem item) {
