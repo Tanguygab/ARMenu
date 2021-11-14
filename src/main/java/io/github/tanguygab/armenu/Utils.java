@@ -32,7 +32,7 @@ public class Utils {
     }
 
     public static IChatBaseComponent newComp(String str) {
-        return IChatBaseComponent.optimizedComponent(EnumChatFormat.color(str));
+        return IChatBaseComponent.fromColoredText(str);
     }
 
     public static String parsePlaceholders(String str, TabPlayer p) {

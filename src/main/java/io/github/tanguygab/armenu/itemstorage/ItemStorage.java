@@ -73,7 +73,8 @@ public class ItemStorage {
     }
 
     public ItemStack getItem(String name) {
-        return items.get(name);
+        if (!items.containsKey(name)) return null;
+        return items.get(name).clone();
     }
     public void removeItem(String name) {
         items.remove(name);

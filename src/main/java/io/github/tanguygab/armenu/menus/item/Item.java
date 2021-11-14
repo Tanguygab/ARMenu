@@ -196,7 +196,7 @@ public class Item {
     }
 
     public net.minecraft.world.item.ItemStack getItem(int frame, TabPlayer p, Page page, int slot) {
-        if (materials.isEmpty()) return net.minecraft.world.item.ItemStack.b;
+        if (materials.isEmpty()) return air;
 
         List<String> lore = new ArrayList<>(this.lores.get(frame));
         lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot)));
@@ -226,17 +226,23 @@ public class Item {
         );
     }
 
+    private final net.minecraft.world.item.ItemStack air = net.minecraft.world.item.ItemStack.b;
+
     public net.minecraft.world.item.ItemStack getItem(String mat, String name, String amount, List<String> lore, Map<String,String> enchants, List<String> flags, Map<String,Map<String,String>> attributes, int slot) {
         ItemStack item;
 
         if (isSkinMat(mat)) {
             Object skin = ARMenu.get().getMenuManager().skins.getSkin(mat);
             if (skin == null)
-                return net.minecraft.world.item.ItemStack.b;
+                return air;
             item = getSkull(skin);
+        } else if (mat.startsWith("item-storage:")) {
+            item = ARMenu.get().getItemStorage().getItem(mat.substring(13));
+            if (item == null)
+                return air;
         } else {
             Material m2 = Material.getMaterial(mat.replace(" ", "_").toUpperCase());
-            if (m2 == null) return net.minecraft.world.item.ItemStack.b;
+            if (m2 == null) return air;
             item = new ItemStack(m2);
         }
 
@@ -275,6 +281,8 @@ public class Item {
 
                 String type = cfg.get("type").toUpperCase().replace(" ","_");
                 AttributeModifier.Operation operation = AttributeModifier.Operation.valueOf(type);
+                if (meta.hasAttributeModifiers())
+                    meta.getAttributeModifiers().clear();
                 meta.addAttributeModifier(att, new AttributeModifier(UUID.randomUUID(), attribute,fAmt, operation, s));
             } catch (Exception ignored) {}
         });
