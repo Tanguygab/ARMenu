@@ -95,7 +95,6 @@ public class ItemCmd {
                         }
 
                     }
-                    p.updateInventory();
                     sendMsg("Took "+(oldamt-amt),item,"from");
                 }
             }
