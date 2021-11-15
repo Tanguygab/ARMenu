@@ -331,7 +331,6 @@ public class MenuSession {
 
     //still being worked on
     public void pickedUpItem(int slot, ItemStack item) {
-        System.out.println(slot);
         slot += page.getLayoutSize()-9;
         if (placedItems.containsKey(slot)) return;
 
