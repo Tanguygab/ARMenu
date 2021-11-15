@@ -245,6 +245,7 @@ public class MenuSession {
 
         if (click.getNames().get(0).startsWith("num_")) {
             List<Integer> slots = new ArrayList<>(placed.keySet());
+            if (slots.isEmpty()) return true;
             int slot1 = slots.get(0);
             int slot2 = slots.get(1);
             org.bukkit.inventory.ItemStack itemStack1 = CraftItemStack.asBukkitCopy(placed.get(slot1));
