@@ -19,6 +19,10 @@ public class InvItem extends Item {
         super("inv-"+slot,null);
         itemStack = item;
     }
+    public InvItem(ItemStack item, int slot) {
+        super("inv-"+slot,null);
+        itemStack = CraftItemStack.asBukkitCopy(item);
+    }
 
     @Override
     public Map<String, List<List<String>>> getSlots() {

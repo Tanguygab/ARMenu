@@ -149,7 +149,7 @@ public class MenuManager extends TabFeature {
     public void onPacketSend(TabPlayer p, Object packet) {
         MenuSession session;
         if (packet instanceof PacketPlayOutSetSlot pickup && pickup.b() == 0 && (session = sessions.get(p)) != null) {
-            //session.pickedUpItem(pickup.c(),pickup.d());
+            session.pickedUpItem(pickup.c(),pickup.d());
         }
     }
 }
