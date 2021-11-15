@@ -258,9 +258,6 @@ public class MenuSession {
             }
             PlayerInventory inv = ((Player)p.getPlayer()).getInventory();
 
-            System.out.println(itemStack1+" "+item2+" "+slot1);
-            System.out.println(itemStack2+" "+item1+" "+slot2);
-
             int index1 = slot1-page.getLayoutSize()+9;
             if (index1 >= 36 && index1 < 45) index1 -= 36;
             int index2 = slot2-page.getLayoutSize()+9;
@@ -338,8 +335,6 @@ public class MenuSession {
         slot += page.getLayoutSize()-9;
         if (placedItems.containsKey(slot)) return;
 
-        System.out.println("setslot "+slot+" | "+item);
-
         if (item == ItemStack.b) {
             currentItems.put(slot,new InvItem(item, slot));
             lastSentItems.set(slot,item);
@@ -350,19 +345,6 @@ public class MenuSession {
             currentItems.put(slot, new InvItem(item, slot));
             lastSentItems.set(slot,item);
         }
-
-        //int index = slot-page.getLayoutSize()+9;
-        //if (index >= 36 && index < 45) index -= 36;
-        /*
-        org.bukkit.inventory.ItemStack bukkitItem = CraftItemStack.asBukkitCopy(item);
-        if (currentItems.get(slot) instanceof InvItem invItem && invItem.itemStack != null && invItem.itemStack.equals(bukkitItem)) {
-            invItem.itemStack.setAmount(invItem.itemStack.getAmount()+bukkitItem.getAmount());
-            placedItems.put(slot,invItem.getItem());
-            updateLastSentItems();
-        } else {
-            p.sendMessage("find empty slot",false);
-        }
-        */
     }
 
     public void onMenuButton(int buttonId) {
