@@ -5,9 +5,11 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.placeholders.Placeholder;
-import me.neznamy.tab.shared.placeholders.RelationalPlaceholder;
+import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.ServerPlaceholderImpl;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -37,7 +39,6 @@ public class Utils {
 
     public static String parsePlaceholders(String str, TabPlayer p) {
         if (str == null) return "";
-        //if (p == null) return str;
         if (!str.contains("%")) return EnumChatFormat.color(str);
         for (String pl : TabAPI.getInstance().getPlaceholderManager().detectPlaceholders(str))
             str = str.replace(pl,getLastPlaceholderValue(pl,p,null));
@@ -66,11 +67,16 @@ public class Utils {
     private static String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer) {
         TabAPI.getInstance().getPlaceholderManager().addUsedPlaceholder(str,ARMenu.get().getMenuManager());
         Placeholder pl = TAB.getInstance().getPlaceholderManager().getPlaceholder(str);
-        if (pl instanceof RelationalPlaceholder) {
+        if (pl instanceof RelationalPlaceholderImpl relpl) {
             if (p == null || viewer == null) return str;
-            return ((RelationalPlaceholder) pl).getLastValue(p, viewer);
+            return  relpl.getLastValue(p, viewer);
         }
-        String value = pl.getLastValue(p);
+        String value = "";
+        if (pl instanceof ServerPlaceholderImpl spl)
+            value = spl.getLastValue(p);
+        if (pl instanceof PlayerPlaceholderImpl ppl)
+            value = ppl.getLastValue(p);
+
         String newValue = TabAPI.getInstance().getPlaceholderManager().findReplacement(pl.getIdentifier(), value);
         if (newValue.contains("%value%"))
             newValue = newValue.replace("%value%", value);

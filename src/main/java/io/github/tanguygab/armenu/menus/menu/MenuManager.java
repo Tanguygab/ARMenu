@@ -31,7 +31,7 @@ public class MenuManager extends TabFeature {
     public SkinManager skins;
 
     public MenuManager() {
-        super("&2ARMenu&r");
+        super("ARMenu","&2ARMenu&r");
         try {
             config = new YamlConfigurationFile(ARMenu.class.getClassLoader().getResourceAsStream("config.yml"), new File(ARMenu.get().getDataFolder(), "config.yml"));
             skins = new SkinManager("texture:f3d5e43de5d4177c4baf2f44161554473a3b0be5430998b5fcd826af943afe3");
