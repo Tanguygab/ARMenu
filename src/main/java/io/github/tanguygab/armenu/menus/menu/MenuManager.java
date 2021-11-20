@@ -3,7 +3,7 @@ package io.github.tanguygab.armenu.menus.menu;
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.commands.CreateCmd;
 import io.github.tanguygab.armenu.menus.item.ClickType;
-import me.neznamy.tab.api.PlaceholderManager;
+import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
