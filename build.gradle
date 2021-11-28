@@ -23,5 +23,5 @@ repositories {
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT'
     compileOnly 'net.luckperms:api:5.3'
-    compileOnly files('../TAB-3.0.jar','../nms-1.17.1.jar')
+    compileOnly files('../TAB-3.0.0.jar','../nms-1.17.1.jar')
 }
