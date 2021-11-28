@@ -97,7 +97,8 @@ public class MenuSession {
         }
 
         task = TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,"refreshing ARMenu menu for player "+p.getName(),ARMenu.get().getMenuManager(),"refreshing",()->{
-            //sendPackets(true);
+            if (ARMenu.get().getMenuManager().config.getBoolean("refresh",false))
+                sendPackets(true);
         });
     }
 
