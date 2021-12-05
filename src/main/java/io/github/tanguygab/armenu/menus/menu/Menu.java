@@ -59,14 +59,22 @@ public class Menu {
     }
 
     public boolean onOpen(TabPlayer p) {
-        return onEvent(p,"events.open","","");
+        return onEvent(p,"events.open",null);
     }
 
     public boolean onClose(TabPlayer p) {
-        return onEvent(p,"events.close","","");
+        return onEvent(p,"events.close", null);
     }
 
+
     public boolean onEvent(TabPlayer p, String path, String click, String where) {
+        Map<String,String> map = new HashMap<>();
+        map.put("%click%",click);
+        map.put("%where%",where);
+        return onEvent(p,path,map);
+    }
+
+    public boolean onEvent(TabPlayer p, String path, Map<String,String> replacements) {
         if (!config.hasConfigOption(path)) return true;
 
         List<Object> cfg = (List<Object>) config.getObject(path);
@@ -74,13 +82,13 @@ public class Menu {
         List<Map<Action,String>> list = new ArrayList<>();
         for (Object element : cfg) {
             if (element instanceof String el)
-                list.add(Utils.map(el.replace("%click%",click).replace("%where%",where)));
+                list.add(Utils.map(Utils.replacements(el,replacements)));
             if (element instanceof Map<?,?> condmap) {
                 String cond = condmap.get("condition")+"";
-                Condition condition = Condition.getCondition(cond.replace("%click%",click).replace("%where%",where));
+                Condition condition = Condition.getCondition(Utils.replacements(cond,replacements));
                 String section = (condition.isMet(p) ? "" : "deny-") + "actions";
                 if (!condmap.containsKey(section)) continue;
-                ((List<String>)condmap.get(section)).forEach(str->list.add(Utils.map(str.replace("%click%",click).replace("%where%",where))));
+                ((List<String>)condmap.get(section)).forEach(str->list.add(Utils.map(Utils.replacements(str,replacements))));
             }
         }
 

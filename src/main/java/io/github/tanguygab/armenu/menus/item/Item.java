@@ -196,26 +196,28 @@ public class Item {
     public net.minecraft.world.item.ItemStack getItem(int frame, TabPlayer p, Page page, int slot) {
         if (materials.isEmpty()) return air;
 
+        Map<String,String> replacements = replacements(p,page,slot);
+
         List<String> lore = new ArrayList<>(this.lores.get(frame));
-        lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot)));
+        lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,replacements)));
 
         Map<String,String> enchants = new HashMap<>(this.enchants);
-        enchants.forEach((enchant,lvl)->enchants.put(placeholders(enchant,p,page,slot),placeholders(lvl,p,page,slot)));
+        enchants.forEach((enchant,lvl)->enchants.put(placeholders(enchant,p,replacements),placeholders(lvl,p,replacements)));
 
         List<String> flags = new ArrayList<>(this.flags);
-        flags.forEach(flag->flags.set(flags.indexOf(flag),placeholders(flag,p,page,slot)));
+        flags.forEach(flag->flags.set(flags.indexOf(flag),placeholders(flag,p,replacements)));
 
         Map<String,Map<String,String>> attributes = new HashMap<>(this.attributes);
         attributes.forEach((attribute,cfg)->{
             cfg.forEach((opt,value)->{
-                cfg.put(placeholders(opt,p,page,slot),placeholders(value,p,page,slot));
+                cfg.put(placeholders(opt,p,replacements),placeholders(value,p,replacements));
             });
-            attributes.put(placeholders(attribute,p,page,slot),cfg);
+            attributes.put(placeholders(attribute,p,replacements),cfg);
         });
 
-        return getItem(placeholders(materials.get(frame),p,page,slot),
-                names.isEmpty() ? null : placeholders(names.get(frame),p,page,slot),
-                amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,page,slot),
+        return getItem(placeholders(materials.get(frame),p,replacements),
+                names.isEmpty() ? null : placeholders(names.get(frame),p,replacements),
+                amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,replacements),
                 lore,
                 enchants,
                 flags,
@@ -291,23 +293,30 @@ public class Item {
         return CraftItemStack.asNMSCopy(item);
     }
 
-    protected String placeholders(String text, TabPlayer p, Page page, int slot) {
-        text = text.replace("%page%",page.getName())
-                .replace("%slot%",slot+"");
+    protected String placeholders(String text, TabPlayer p, Map<String,String> replacements) {
+        text = Utils.replacements(text,replacements);
+        return Utils.parsePlaceholders(text,p);
+    }
 
+    protected Map<String,String> replacements(TabPlayer p, Page page, int slot) {
+        Map<String,String> map = new HashMap<>();
+        map.put("%slot%",slot+"");
+        map.put("%page%", page.getName());
         List<String> args = ARMenu.get().getMenuManager().sessions.get(p).getArguments();
         for (String arg : args)
-            text = text.replace("%arg-"+args.indexOf(arg)+"%",arg);
-        text = text.replace("%args-amount%",args.size()+"")
-                .replace("%args%",String.join(" ",args));
-
-        return Utils.parsePlaceholders(text,p);
+            map.put("%arg-"+args.indexOf(arg)+"%",arg);
+        map.put("%args-amount%",args.size()+"");
+        map.put("%args%",String.join(" ",args));
+        return map;
     }
 
     public List<Map<Action,String>> getClickActions(ClickType clickType, TabPlayer p, int slot, Page page) {
         List<Map<Action,String>> list = new ArrayList<>();
         Map<String,Object> actions = (Map<String, Object>) config.get("actions");
         if (actions == null) return list;
+
+        Map<String,String> replacements = replacements(p,page,slot);
+        replacements.put("%click%",clickType+"");
 
         for (String type : actions.keySet()) {
             for (String type2 : type.split(",")) {
@@ -317,7 +326,7 @@ public class Item {
                     continue;
                 }
                 if (click != clickType) continue;
-                page.getMenu().onEvent(p,"items."+name+".actions."+type,click+"",slot+"");
+                page.getMenu().onEvent(p,"items."+name+".actions."+type,replacements);
             }
         }
         return list;

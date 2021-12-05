@@ -90,6 +90,13 @@ public class Utils {
         return map;
     }
 
+    public static String replacements(String str, Map<String,String> replacements) {
+        if (replacements == null) return str;
+        for (String placeholder : replacements.keySet())
+            str = str.replace(placeholder,replacements.get(placeholder));
+        return str;
+    }
+
     public static int parseInt(String arg, int i) {
         try {return Integer.parseInt(arg);}
         catch (Exception e) {return i;}

@@ -59,7 +59,11 @@ public class ListItem extends Item {
 
     public String[] getItemInList(TabPlayer p, int slot, Page page) {
 
-        String in = placeholders(input,p,page,slot);
+        String in = Utils.parsePlaceholders(input
+                .replace("%page%",page.getName())
+                .replace("%slot%",slot+"")
+                ,p);
+
         String[] list = in.split(separator);
 
         List<String> l = getLayoutSlots(page.getMenu());
@@ -86,27 +90,28 @@ public class ListItem extends Item {
         String[] list = getItemInList(p, slot, page);
         String listPos = list[0];
         String listItem = list[1];
+        Map<String,String> replacements = replacements(p,page,slot,listPos,listItem);
 
         List<String> lore = new ArrayList<>(this.lores.get(frame));
-        lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,page,slot,listPos,listItem)));
+        lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,replacements)));
 
         Map<String,String> enchants = new HashMap<>(this.enchants);
-        enchants.forEach((enchant,lvl)->enchants.put(placeholders(enchant,p,page,slot,listPos,listItem),placeholders(lvl,p,page,slot,listPos,listItem)));
+        enchants.forEach((enchant,lvl)->enchants.put(placeholders(enchant,p,replacements),placeholders(lvl,p,replacements)));
 
         List<String> flags = new ArrayList<>(this.flags);
-        flags.forEach(flag->flags.set(flags.indexOf(flag),placeholders(flag,p,page,slot,listPos,listItem)));
+        flags.forEach(flag->flags.set(flags.indexOf(flag),placeholders(flag,p,replacements)));
 
         Map<String,Map<String,String>> attributes = new HashMap<>(this.attributes);
         attributes.forEach((attribute,cfg)->{
             cfg.forEach((opt,value)->{
-                cfg.put(placeholders(opt,p,page,slot),placeholders(value,p,page,slot));
+                cfg.put(placeholders(opt,p,replacements),placeholders(value,p,replacements));
             });
-            attributes.put(placeholders(attribute,p,page,slot),cfg);
+            attributes.put(placeholders(attribute,p,replacements),cfg);
         });
 
-        return getItem(placeholders(materials.get(frame),p,page,slot,listPos,listItem),
-                names.isEmpty() ? null : placeholders(names.get(frame),p,page,slot,listPos,listItem),
-                amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,page,slot,listPos,listItem),
+        return getItem(placeholders(materials.get(frame),p,replacements),
+                names.isEmpty() ? null : placeholders(names.get(frame),p,replacements),
+                amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,replacements),
                 lore,
                 enchants,
                 flags,
@@ -115,12 +120,13 @@ public class ListItem extends Item {
                 );
     }
 
-    private String placeholders(String text, TabPlayer p, Page page, Integer slot, String listPos, String listItem) {
-        return placeholders(text
-                .replace("%list-pos%", listPos+"")
-                .replace("%list-item%", listItem)
-                ,p,page,slot);
+    private Map<String,String> replacements(TabPlayer p, Page page, int slot, String listPos, String listItem) {
+        Map<String,String> replacements = replacements(p,page,slot);
+        replacements.put("%list-pos%",listPos);
+        replacements.put("%list-item%",listItem);
+        return replacements;
     }
+
     @Override
     public List<Map<Action,String>> getClickActions(ClickType clickType, TabPlayer p, int slot, Page page) {
         List<Map<Action,String>> list = new ArrayList<>();
@@ -130,6 +136,8 @@ public class ListItem extends Item {
         String[] listList = getItemInList(p, slot, page);
         String listPos = listList[0];
         String listItem = listList[1];
+        Map<String,String> replacements = replacements(p,page,slot,listPos,listItem);
+        replacements.put("%click%",clickType+"");
 
         for (String type : actions.keySet()) {
             for (String type2 : type.split(",")) {
@@ -139,17 +147,7 @@ public class ListItem extends Item {
                     continue;
                 }
                 if (click == clickType) continue;
-                for (Object element : (List<Object>) actions.get(type)) {
-                    if (element instanceof String el)
-                        list.add(Utils.map(placeholders(el,page,slot,listPos,listItem)));
-                    if (element instanceof Map<?,?> condmap) {
-                        String cond = condmap.get("condition")+"";
-                        Condition condition = Condition.getCondition(cond);
-                        String section = (condition.isMet(p) ? "" : "deny-") + "actions";
-                        if (!condmap.containsKey(section)) continue;
-                        ((List<String>)condmap.get(section)).forEach(str->list.add(Utils.map(placeholders(str,page,slot,listPos,listItem))));
-                    }
-                }
+                page.getMenu().onEvent(p,"items."+name+".actions."+type,replacements);
             }
         }
         return list;
