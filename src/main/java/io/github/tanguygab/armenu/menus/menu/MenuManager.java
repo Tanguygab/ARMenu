@@ -16,6 +16,8 @@ import net.minecraft.world.item.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,7 +117,10 @@ public class MenuManager extends TabFeature {
         if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && creators.containsKey(p)) {
             CreateCmd creator = creators.get(p);
             ItemStack placed = ItemStack.b;
-            try {placed = (ItemStack) click.f().getClass().getMethod("getOrDefault", int.class, Object.class).invoke(click.f(),click.c(),ItemStack.b);}
+            try {
+                Object map = click.getClass().getDeclaredMethod("f").invoke(click);
+                placed = (ItemStack) map.getClass().getMethod("getOrDefault", int.class, Object.class).invoke(map,click.c(),ItemStack.b);
+            }
             catch (Exception e) {e.printStackTrace();}
             creator.addItem(placed,click.c());
         }
@@ -129,7 +134,12 @@ public class MenuManager extends TabFeature {
             int button = click.d();
             InventoryClickType mode = click.g();
             ItemStack item = click.e();
-            Map<Integer,ItemStack> placed = new HashMap<>(click.f());
+            Map<Integer,ItemStack> placed;
+            try {
+                placed = (Map<Integer, ItemStack>) click.getClass().getDeclaredMethod("f").invoke(click);
+            } catch (Exception e) {
+                placed = new HashMap<>();
+            }
 
             ClickType clickType = ClickType.get(mode,button,slot);
             return session.onClickPacket(slot,clickType,item,placed);

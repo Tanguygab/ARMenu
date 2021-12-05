@@ -9,7 +9,7 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -113,6 +113,6 @@ public class ItemCmd {
     }
 
     public String getItemStack(ItemStack item) {
-        return CraftItemStack.asNMSCopy(item).save(new NBTTagCompound()).toString();
+        return CraftItemStack.asNMSCopy(item).b(new NBTTagCompound()).toString();
     }
 }

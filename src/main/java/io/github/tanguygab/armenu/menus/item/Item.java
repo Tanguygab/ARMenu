@@ -7,13 +7,11 @@ import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.placeholders.conditions.Condition;
-import net.minecraft.world.inventory.InventoryClickType;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
@@ -319,17 +317,7 @@ public class Item {
                     continue;
                 }
                 if (click != clickType) continue;
-                for (Object element : (List<Object>) actions.get(type)) {
-                    if (element instanceof String el)
-                        list.add(Utils.map(el));
-                    if (element instanceof Map<?,?> condmap) {
-                        String cond = condmap.get("condition")+"";
-                        Condition condition = Condition.getCondition(cond);
-                        String section = (condition.isMet(p) ? "" : "deny-") + "actions";
-                        if (!condmap.containsKey(section)) continue;
-                        ((List<String>)condmap.get(section)).forEach(str->list.add(Utils.map(str)));
-                    }
-                }
+                page.getMenu().onEvent(p,"items."+name+".actions."+type,click+"",slot+"");
             }
         }
         return list;

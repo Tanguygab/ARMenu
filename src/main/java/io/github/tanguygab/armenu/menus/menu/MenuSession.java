@@ -18,7 +18,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -279,7 +279,7 @@ public class MenuSession {
         }
 
 
-        int heldCount = heldItemStack.getCount();
+        int heldCount = heldItemStack.I();
         placedItems.clear();
 
         Item currentHeldItem = currentItems.get(slot);
@@ -300,11 +300,11 @@ public class MenuSession {
                 Item newItem = heldItem;
                 if (heldItem instanceof InvItem item) {
                     if (item.itemStack != null && item.itemStack.getAmount() != heldCount) {
-                        newItem = item.split(placedItem.getCount(), placedSlot);
+                        newItem = item.split(placedItem.I(), placedSlot);
 
-                        int amt = heldItemStack.getCount() - placedItem.getCount();
+                        int amt = heldItemStack.I() - placedItem.I();
                         if (amt < 0) amt = 1;
-                        heldItemStack.setCount(amt);
+                        heldItemStack.e(amt);
                     }
                 }
 

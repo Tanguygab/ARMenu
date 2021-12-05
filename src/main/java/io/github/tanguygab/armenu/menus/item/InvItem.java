@@ -3,10 +3,9 @@ package io.github.tanguygab.armenu.menus.item;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
-import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 
 import java.util.List;
 import java.util.Map;
