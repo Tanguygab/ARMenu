@@ -92,13 +92,11 @@ public class Menu {
             }
         }
 
-        boolean canProceed = true;
         for (Map<Action,String> map : list) {
             for (Action ac : map.keySet()) {
                 String str = map.get(ac);
                 if (str.equalsIgnoreCase("return")) {
-                    canProceed = false;
-                    continue;
+                    return false;
                 }
                 if (str.equalsIgnoreCase("close") && path.equals("events.close"))
                     continue;
@@ -107,7 +105,7 @@ public class Menu {
         }
 
 
-        return canProceed;
+        return true;
     }
 
 

@@ -9,6 +9,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
     private static ARMenu plugin;
     private MenuManager mm;
     private ItemStorage itemStorage;
+    public EventActions events;
 
     public NamespacedKey namespacedKey;
 
@@ -30,12 +32,15 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
         TabAPI.getInstance().getFeatureManager().registerFeature(mm.getFeatureName(),mm);
         itemStorage = new ItemStorage();
         Action.registerAll();
+        events = new EventActions(this);
+        getServer().getPluginManager().registerEvents(events,this);
     }
 
     @Override
     public void onDisable() {
         TabAPI.getInstance().getFeatureManager().unregisterFeature(mm.getFeatureName());
         mm.unload();
+        HandlerList.unregisterAll(this);
     }
 
     public static ARMenu get() {

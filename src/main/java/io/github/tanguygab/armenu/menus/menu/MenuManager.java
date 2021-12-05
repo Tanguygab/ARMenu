@@ -16,13 +16,8 @@ import net.minecraft.world.item.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MenuManager extends TabFeature {
 
@@ -76,11 +71,7 @@ public class MenuManager extends TabFeature {
 
     @Override
     public void onJoin(TabPlayer p) {
-        String m = config.getString("auto-open.on-join","");
-        if (m.equalsIgnoreCase("")) return;
-        Menu menu = menus.get(m);
-        if (menu == null) return;
-        newMenuSession(p,menu);
+        ARMenu.get().events.onJoin(p);
     }
 
     public void newMenuSession(TabPlayer p, Menu menu) {
@@ -114,6 +105,7 @@ public class MenuManager extends TabFeature {
     public boolean onPacketReceive(TabPlayer p, Object packet) {
         MenuSession session;
 
+        // menu creator
         if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && creators.containsKey(p)) {
             CreateCmd creator = creators.get(p);
             ItemStack placed = ItemStack.b;
@@ -129,6 +121,7 @@ public class MenuManager extends TabFeature {
             creator.close();
         }
 
+        // normal menu
         if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && (session = sessions.get(p)) != null) {
             int slot = click.c();
             int button = click.d();
