@@ -23,6 +23,8 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Item {
 
@@ -38,6 +40,8 @@ public class Item {
     protected List<String> flags;
     protected Map<String,Map<String,String>> attributes;
     protected boolean isMovable;
+
+    private final static Pattern customModelDataPattern = Pattern.compile(",MODEL:(?<data>[0-9])");
 
     public Item(String name, Map<String,Object> config) {
         this.name = name;
@@ -232,6 +236,7 @@ public class Item {
 
     public net.minecraft.world.item.ItemStack getItem(String mat, String name, String amount, List<String> lore, Map<String,String> enchants, List<String> flags, Map<String,Map<String,String>> attributes, int slot) {
         ItemStack item;
+        String customModelData = "";
 
         if (isSkinMat(mat)) {
             Object skin = ARMenu.get().getMenuManager().skins.getSkin(mat);
@@ -249,7 +254,14 @@ public class Item {
             if (item == null)
                 return air;
         } else {
-            Material m2 = Material.getMaterial(mat.replace(" ", "_").toUpperCase());
+            String mat2 = mat.replace(" ", "_").toUpperCase();
+            Matcher matcher = customModelDataPattern.matcher(mat2);
+            if (matcher.find()) {
+                customModelData = matcher.group("data");
+                mat2 = mat2.replace(matcher.group(),"");
+            }
+            Material m2 = Material.getMaterial(mat2);
+            System.out.println(mat2+" "+m2);
             if (m2 == null) return air;
             item = new ItemStack(m2);
         }
@@ -259,6 +271,12 @@ public class Item {
 
         ItemMeta meta = item.getItemMeta();
         assert meta != null;
+
+        if (!customModelData.equals("")) {
+            int modelData = Utils.parseInt(customModelData,-1);
+            if (modelData != -1)
+                item.getItemMeta().setCustomModelData(modelData);
+        }
 
         if (name != null) meta.setDisplayName(name);
         if (!lore.isEmpty()) meta.setLore(lore);
