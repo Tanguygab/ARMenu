@@ -42,6 +42,8 @@ public class Item {
     protected boolean isMovable;
 
     private final static Pattern customModelDataPattern = Pattern.compile(",MODEL:(?<data>[0-9])");
+    private final static Pattern potionEffectPattern = Pattern.compile(",EFFECT:(?<data>[a-zA-Z_]+)");
+    private final static Pattern potionColorPattern = Pattern.compile(",COLOR:(?<data>[0-9A-Fa-f]+)");
 
     public Item(String name, Map<String,Object> config) {
         this.name = name;
@@ -237,6 +239,8 @@ public class Item {
     public net.minecraft.world.item.ItemStack getItem(String mat, String name, String amount, List<String> lore, Map<String,String> enchants, List<String> flags, Map<String,Map<String,String>> attributes, int slot) {
         ItemStack item;
         String customModelData = "";
+        String potionEffect = "";
+        String potionColor = "";
 
         if (isSkinMat(mat)) {
             Object skin = ARMenu.get().getMenuManager().skins.getSkin(mat);
@@ -255,13 +259,25 @@ public class Item {
                 return air;
         } else {
             String mat2 = mat.replace(" ", "_").toUpperCase();
-            Matcher matcher = customModelDataPattern.matcher(mat2);
-            if (matcher.find()) {
-                customModelData = matcher.group("data");
-                mat2 = mat2.replace(matcher.group(),"");
+
+            Matcher modelMatcher = customModelDataPattern.matcher(mat2);
+            if (modelMatcher.find()) {
+                customModelData = modelMatcher.group("data");
+                mat2 = mat2.replace(modelMatcher.group(),"");
             }
+
+            Matcher effectMatcher = potionEffectPattern.matcher(mat2);
+            if (effectMatcher.find()) {
+                potionEffect = effectMatcher.group("data");
+                mat2 = mat2.replace(effectMatcher.group(),"");
+            }
+            Matcher colorMatcher = potionColorPattern.matcher(mat2);
+            if (colorMatcher.find()) {
+                potionColor = colorMatcher.group("data");
+                mat2 = mat2.replace(colorMatcher.group(),"");
+            }
+
             Material m2 = Material.getMaterial(mat2);
-            System.out.println(mat2+" "+m2);
             if (m2 == null) return air;
             item = new ItemStack(m2);
         }
@@ -316,7 +332,15 @@ public class Item {
         meta.getPersistentDataContainer().set(ARMenu.get().namespacedKey, PersistentDataType.STRING,name+"-"+slot);
         item.setItemMeta(meta);
 
-        return CraftItemStack.asNMSCopy(item);
+        net.minecraft.world.item.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+        if (item.getType() == Material.POTION && !potionEffect.equals("")) {
+            nmsItem.s().a("Potion", potionEffect.toLowerCase());
+            int potionColor1 = Utils.parseInt(potionColor,-1);
+            System.out.println(potionColor+" "+potionColor1);
+            if (potionColor1 != -1)
+                nmsItem.s().a("CustomPotionColor", potionColor1);
+        }
+        return nmsItem;
     }
 
     protected String placeholders(String text, TabPlayer p, Map<String,String> replacements) {
