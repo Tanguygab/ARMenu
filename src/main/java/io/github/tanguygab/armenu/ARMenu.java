@@ -2,7 +2,6 @@ package io.github.tanguygab.armenu;
 
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.commands.*;
-import io.github.tanguygab.armenu.itemstorage.ItemStorage;
 import io.github.tanguygab.armenu.menus.menu.MenuManager;
 import me.neznamy.tab.api.TabAPI;
 import org.bukkit.NamespacedKey;

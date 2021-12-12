@@ -2,7 +2,7 @@ package io.github.tanguygab.armenu.commands;
 
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
-import io.github.tanguygab.armenu.itemstorage.ItemStorage;
+import io.github.tanguygab.armenu.ItemStorage;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.api.chat.IChatBaseComponent;

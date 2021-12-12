@@ -1,6 +1,5 @@
-package io.github.tanguygab.armenu.itemstorage;
+package io.github.tanguygab.armenu;
 
-import io.github.tanguygab.armenu.ARMenu;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
