@@ -6,7 +6,9 @@ import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Page;
+import io.th0rgal.oraxen.items.OraxenItems;
 import me.neznamy.tab.api.TabPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -238,6 +240,12 @@ public class Item {
             item = getSkull(skin);
         } else if (mat.startsWith("item-storage:")) {
             item = ARMenu.get().getItemStorage().getItem(mat.substring(13));
+            if (item == null)
+                return air;
+        } else if (mat.startsWith("oraxen:")) {
+            if (!Bukkit.getServer().getPluginManager().isPluginEnabled("Oraxen"))
+                return air;
+            item = OraxenItems.getItemById(mat.substring(7)).build();
             if (item == null)
                 return air;
         } else {
