@@ -142,9 +142,6 @@ public class MenuManager extends TabFeature {
             session.onMenuButton(buttonId);
             return true;
         }
-        if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66 && (session = sessions.get(p)) != null) {
-            session.onClose();
-        }
         return false;
     }
 
@@ -153,6 +150,9 @@ public class MenuManager extends TabFeature {
         MenuSession session;
         if (packet instanceof PacketPlayOutSetSlot pickup && pickup.b() == 0 && (session = sessions.get(p)) != null) {
             session.pickedUpItem(pickup.c(),pickup.d());
+        }
+        if (packet instanceof PacketPlayOutCloseWindow close && close.b() == 66 && (session = sessions.get(p)) != null) {
+            session.sendPackets(false);
         }
     }
 }

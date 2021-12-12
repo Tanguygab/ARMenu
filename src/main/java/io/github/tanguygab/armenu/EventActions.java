@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -38,6 +39,7 @@ public class EventActions implements Listener {
         String name = entity.getCustomName() == null ? type : entity.getCustomName();
 
         Map<String,String> map = new HashMap<>();
+        map.put("%hand%",e.getHand().toString().toLowerCase().replace("_"," "));
         map.put("%entity%",name);
         map.put("%entity-type%",type);
 
@@ -54,6 +56,7 @@ public class EventActions implements Listener {
         String name = item.getItemMeta() == null || !item.getItemMeta().hasDisplayName() ? type : item.getItemMeta().getDisplayName();
 
         Map<String,String> map = new HashMap<>();
+        map.put("%hand%",e.getHand().toString().toLowerCase().replace("_"," "));
         map.put("%item%",name);
         map.put("%item-type%",type);
 
@@ -71,7 +74,6 @@ public class EventActions implements Listener {
         map.put("%action%",action);
 
         e.setCancelled(onEvent(TabAPI.getInstance().getPlayer(p.getUniqueId()), "item-click",map));
-
     }
 
     private boolean disabled(String name) {
