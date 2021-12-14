@@ -1,7 +1,6 @@
 package io.github.tanguygab.armenu.menus.menu.InventoryEnums;
 
 import java.util.List;
-import java.util.Locale;
 
 public enum InventoryButton {
 

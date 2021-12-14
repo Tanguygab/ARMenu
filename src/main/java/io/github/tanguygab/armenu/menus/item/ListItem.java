@@ -6,7 +6,6 @@ import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Menu;
 import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 import java.util.*;
 
