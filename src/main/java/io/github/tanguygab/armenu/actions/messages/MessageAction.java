@@ -2,6 +2,7 @@ package io.github.tanguygab.armenu.actions.messages;
 
 import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -29,8 +30,8 @@ public class MessageAction extends Action {
 
     @Override
     public void execute(String match, TabPlayer p) {
-        if (p == null) return;
         match = Utils.parsePlaceholders(match,p);
-        p.sendMessage(match,true);
+        if (p == null) TabAPI.getInstance().sendConsoleMessage(match,true);
+        else p.sendMessage(match,true);
     }
 }
