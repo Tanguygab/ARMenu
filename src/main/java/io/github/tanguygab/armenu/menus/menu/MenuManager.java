@@ -1,5 +1,7 @@
 package io.github.tanguygab.armenu.menus.menu;
 
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.commands.CreateCmd;
 import io.github.tanguygab.armenu.menus.item.ClickType;
@@ -10,12 +12,14 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.features.layout.skin.SkinManager;
+import net.minecraft.commands.ICompletionProvider;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -23,6 +27,7 @@ public class MenuManager extends TabFeature {
 
     public ConfigurationFile config;
     public Map<String, Menu> menus = new HashMap<>();
+    public List<String> commands = new ArrayList<>();
     public Map<TabPlayer, MenuSession> sessions = new HashMap<>();
     public Map<TabPlayer, CreateCmd> creators = new HashMap<>();
     public SkinManager skins;
@@ -54,7 +59,9 @@ public class MenuManager extends TabFeature {
             for (File file : files) {
                 ConfigurationFile cfg = new YamlConfigurationFile(null, file);
                 String name = file.getName().replace(".yml","");
-                menus.put(name,new Menu(name,cfg));
+                Menu menu = new Menu(name,cfg);
+                menus.put(name,menu);
+                commands.addAll(menu.getCommands());
             }
 
             PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
@@ -147,6 +154,17 @@ public class MenuManager extends TabFeature {
 
     @Override
     public void onPacketSend(TabPlayer p, Object packet) {
+        if (packet instanceof PacketPlayOutCommands cmds) {
+            try {
+                Field field = cmds.getClass().getDeclaredField("h");
+                field.setAccessible(true);
+                RootCommandNode<ICompletionProvider> rootcmd = (RootCommandNode<ICompletionProvider>) field.get(packet);
+                commands.forEach(cmd->rootcmd.addChild(new LiteralCommandNode<>(cmd,null,c -> true, null, s -> Collections.singleton(s.getSource()),false)));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         MenuSession session;
         if (packet instanceof PacketPlayOutSetSlot pickup && pickup.b() == 0 && (session = sessions.get(p)) != null) {
             session.pickedUpItem(pickup.c(),pickup.d());
