@@ -8,6 +8,7 @@ import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Page;
 import io.th0rgal.oraxen.items.OraxenItems;
 import me.neznamy.tab.api.TabPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -43,7 +44,7 @@ public class Item {
 
     private final static Pattern customModelDataPattern = Pattern.compile(",MODEL:(?<data>[0-9])");
     private final static Pattern potionEffectPattern = Pattern.compile(",EFFECT:(?<data>[a-zA-Z_]+)");
-    private final static Pattern potionColorPattern = Pattern.compile(",COLOR:(?<data>[0-9A-Fa-f]+)");
+    private final static Pattern colorPattern = Pattern.compile(",COLOR:(?<data>[0-9A-Fa-f]+)");
 
     public Item(String name, Map<String,Object> config) {
         this.name = name;
@@ -240,7 +241,7 @@ public class Item {
         ItemStack item;
         String customModelData = "";
         String potionEffect = "";
-        String potionColor = "";
+        String color = "";
 
         if (isSkinMat(mat)) {
             Object skin = ARMenu.get().getMenuManager().skins.getSkin(mat);
@@ -271,9 +272,9 @@ public class Item {
                 potionEffect = effectMatcher.group("data");
                 mat2 = mat2.replace(effectMatcher.group(),"");
             }
-            Matcher colorMatcher = potionColorPattern.matcher(mat2);
+            Matcher colorMatcher = colorPattern.matcher(mat2);
             if (colorMatcher.find()) {
-                potionColor = colorMatcher.group("data");
+                color = colorMatcher.group("data");
                 mat2 = mat2.replace(colorMatcher.group(),"");
             }
 
@@ -333,12 +334,19 @@ public class Item {
         item.setItemMeta(meta);
 
         net.minecraft.world.item.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
-        if (item.getType() == Material.POTION && !potionEffect.equals("")) {
-            nmsItem.s().a("Potion", potionEffect.toLowerCase());
-            int potionColor1 = Utils.parseInt(potionColor,-1);
-            System.out.println(potionColor+" "+potionColor1);
-            if (potionColor1 != -1)
-                nmsItem.s().a("CustomPotionColor", potionColor1);
+        if (item.getType() == Material.POTION || item.getType() == Material.TIPPED_ARROW) {
+            if (!potionEffect.equals(""))
+                nmsItem.s().a("Potion", potionEffect.toLowerCase());
+            if (!color.equals("")) {
+                int potionColor = Utils.parseInt(color, -1);
+                if (potionColor != -1)
+                    nmsItem.s().a("CustomPotionColor", potionColor);
+            }
+        }
+        else if (!color.equals("")) {
+            int color1 = Utils.parseInt(color, -1);
+            if (color1 != -1)
+                ((NBTTagCompound)nmsItem.s().c("display")).a("color",color1);
         }
         return nmsItem;
     }
