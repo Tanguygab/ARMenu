@@ -296,7 +296,10 @@ public class Item {
         }
 
         if (name != null) meta.setDisplayName(name);
-        if (!lore.isEmpty()) meta.setLore(lore);
+        if (!lore.isEmpty()) {
+            String lore1 = String.join("\n",lore);
+            meta.setLore(List.of(lore1.split("\n")));
+        }
 
         if (!enchants.isEmpty()) enchants.forEach((enchant,lvl)->{
             Enchantment e = Enchantment.getByKey(NamespacedKey.minecraft(enchant.toLowerCase().replace(" ","_")));
