@@ -4,6 +4,7 @@ import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.actions.commands.ConsoleAction;
 import io.github.tanguygab.armenu.actions.commands.PermissionAction;
 import io.github.tanguygab.armenu.actions.commands.PlayerAction;
+import io.github.tanguygab.armenu.actions.items.GiveItemAction;
 import io.github.tanguygab.armenu.actions.items.GiveItemStorageAction;
 import io.github.tanguygab.armenu.actions.items.TakeItemStorageAction;
 import io.github.tanguygab.armenu.actions.menus.*;
@@ -54,6 +55,7 @@ public abstract class Action {
                 new ConsoleAction(),
                 new PlayerAction(),
 
+                new GiveItemAction(),
                 new GiveItemStorageAction(),
                 new TakeItemStorageAction(),
 
