@@ -53,6 +53,7 @@ public abstract class Action {
 
                 new GiveItemAction(),
                 new GiveItemStorageAction(),
+                new RepairItemAction(),
                 new TakeItemAction(),
                 new TakeItemStorageAction(),
 
