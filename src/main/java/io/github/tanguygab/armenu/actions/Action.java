@@ -1,12 +1,8 @@
 package io.github.tanguygab.armenu.actions;
 
 import io.github.tanguygab.armenu.ARMenu;
-import io.github.tanguygab.armenu.actions.commands.ConsoleAction;
-import io.github.tanguygab.armenu.actions.commands.PermissionAction;
-import io.github.tanguygab.armenu.actions.commands.PlayerAction;
-import io.github.tanguygab.armenu.actions.items.GiveItemAction;
-import io.github.tanguygab.armenu.actions.items.GiveItemStorageAction;
-import io.github.tanguygab.armenu.actions.items.TakeItemStorageAction;
+import io.github.tanguygab.armenu.actions.commands.*;
+import io.github.tanguygab.armenu.actions.items.*;
 import io.github.tanguygab.armenu.actions.menus.*;
 import io.github.tanguygab.armenu.actions.messages.*;
 import me.neznamy.tab.api.TabPlayer;
@@ -57,6 +53,7 @@ public abstract class Action {
 
                 new GiveItemAction(),
                 new GiveItemStorageAction(),
+                new TakeItemAction(),
                 new TakeItemStorageAction(),
 
                 new CloseAction(),

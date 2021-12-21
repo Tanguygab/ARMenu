@@ -42,7 +42,6 @@ public class TakeItemStorageAction extends Action {
         if (item == null) return;
 
         Player p = (Player) player.getPlayer();
-        int oldamt = amt;
         ItemStack[] items = p.getInventory().getContents();
         for (int i = 0; i < items.length; i++) {
             if (amt <= 0) break;
