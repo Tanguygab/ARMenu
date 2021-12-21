@@ -51,6 +51,9 @@ public abstract class Action {
                 new ConsoleAction(),
                 new PlayerAction(),
 
+                new EnchantItemAction("add"),
+                new EnchantItemAction("set"),
+                new EnchantItemAction("take"),
                 new GiveItemAction(),
                 new GiveItemStorageAction(),
                 new RepairItemAction(),
