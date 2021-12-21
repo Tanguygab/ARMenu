@@ -2,6 +2,9 @@ package io.github.tanguygab.armenu.actions;
 
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.actions.commands.*;
+import io.github.tanguygab.armenu.actions.data.RemoveDataAction;
+import io.github.tanguygab.armenu.actions.data.SetDataAction;
+import io.github.tanguygab.armenu.actions.data.SetTempDataAction;
 import io.github.tanguygab.armenu.actions.items.*;
 import io.github.tanguygab.armenu.actions.menus.*;
 import io.github.tanguygab.armenu.actions.messages.*;
@@ -18,7 +21,6 @@ import java.util.regex.Pattern;
 public abstract class Action {
 
     private static final List<Action> actions = new ArrayList<>();
-    public static final List<String> suggestions = new ArrayList<>();
 
     public static Action find(String action) {
         for (Action ac : actions) {
@@ -51,6 +53,10 @@ public abstract class Action {
                 new ConsoleAction(),
                 new PlayerAction(),
 
+                new RemoveDataAction(),
+                new SetDataAction(),
+                new SetTempDataAction(),
+
                 new EnchantItemAction("add"),
                 new EnchantItemAction("set"),
                 new EnchantItemAction("take"),
@@ -79,16 +85,17 @@ public abstract class Action {
                 new TitleAction()
 
         );
-        getSugestions();
         if (Bukkit.getServer().getPluginManager().isPluginEnabled("LuckPerms"))
             Action.register(new PermissionAction());
     }
 
-    public static void getSugestions() {
+    public static List<String> getSugestions(String arg) {
+        List<String> suggestions = new ArrayList<>();
         actions.forEach(action->{
-            if (action.getSuggestion() != null)
+            if (action.getSuggestion() != null && action.getSuggestion().startsWith(arg))
                 suggestions.add(action.getSuggestion());
         });
+        return suggestions;
     }
 
     public abstract Pattern getPattern();

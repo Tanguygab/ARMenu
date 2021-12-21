@@ -20,7 +20,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
     private MenuManager mm;
     private ItemStorage itemStorage;
     public EventActions events;
-
+    public Data data;
     public NamespacedKey namespacedKey;
 
     @Override
@@ -33,6 +33,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
         Action.registerAll();
         events = new EventActions(this);
         getServer().getPluginManager().registerEvents(events,this);
+        data = new Data();
     }
 
     @Override
@@ -40,6 +41,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
         TabAPI.getInstance().getFeatureManager().unregisterFeature(mm.getFeatureName());
         mm.unload();
         HandlerList.unregisterAll(this);
+        data.unload();
     }
 
     public static ARMenu get() {
@@ -82,7 +84,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
             return List.of("help","open","list","create","execute","items","reload");
         switch (args[0]) {
             case "open" -> {if (args.length == 2) return mm.getMenus();}
-            case "execute" -> {if (args.length == 3) return Action.suggestions;}
+            case "execute" -> {if (args.length == 3) return Action.getSugestions(args[2]);}
             case "items" -> {
                 if (args.length == 2) return List.of("give","take","save","delete","list");
                 if (args.length == 3 && !args[1].equalsIgnoreCase("list") && !args[1].equalsIgnoreCase("save")) return new ArrayList<>(itemStorage.getItems().keySet());

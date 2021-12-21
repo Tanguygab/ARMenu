@@ -5,11 +5,8 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.api.placeholder.Placeholder;
+import me.neznamy.tab.shared.PropertyImpl;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
-import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
-import me.neznamy.tab.shared.placeholders.ServerPlaceholderImpl;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -40,48 +37,26 @@ public class Utils {
     public static String parsePlaceholders(String str, TabPlayer p) {
         if (str == null) return "";
         if (!str.contains("%")) return EnumChatFormat.color(str);
-        for (String pl : TabAPI.getInstance().getPlaceholderManager().detectPlaceholders(str))
-            str = str.replace(pl,getLastPlaceholderValue(pl,p,null));
+        str = new PropertyImpl(ARMenu.get().getMenuManager(),p,str).get();
         return EnumChatFormat.color(str);
     }
 
-    public static String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def) {
+    public static String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer) {
         List<String> list = TabAPI.getInstance().getPlaceholderManager().detectPlaceholders(str);
-        TabPlayer def2 = def == viewer ? sender : viewer;
         for (String pl : list) {
             if (pl.startsWith("%sender:") && sender != null) {
                 String pl2 = pl.replace("%sender:", "%");
-                str = str.replace(pl,getLastPlaceholderValue(pl2,sender,viewer));
+                str = str.replace(pl,new PropertyImpl(ARMenu.get().getMenuManager(),sender,pl2).getFormat(viewer));
                 continue;
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
                 String pl2 = pl.replace("%viewer:", "%");
-                str = str.replace(pl,getLastPlaceholderValue(pl2,viewer,sender));
+                str = str.replace(pl,new PropertyImpl(ARMenu.get().getMenuManager(),viewer,pl2).getFormat(sender));
                 continue;
             }
-            str = str.replace(pl,getLastPlaceholderValue(pl,def,def2));
+            str = str.replace(pl,new PropertyImpl(ARMenu.get().getMenuManager(),sender,pl).getFormat(viewer));
         }
         return EnumChatFormat.color(str);
-    }
-
-    private static String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer) {
-        TabAPI.getInstance().getPlaceholderManager().addUsedPlaceholder(str,ARMenu.get().getMenuManager());
-        Placeholder pl = TAB.getInstance().getPlaceholderManager().getPlaceholder(str);
-        if (pl instanceof RelationalPlaceholderImpl relpl) {
-            if (p == null || viewer == null) return str;
-            return  relpl.getLastValue(p, viewer);
-        }
-        String value = "";
-        if (pl instanceof ServerPlaceholderImpl spl)
-            value = spl.getLastValue(p);
-        if (pl instanceof PlayerPlaceholderImpl ppl)
-            value = ppl.getLastValue(p);
-
-        String newValue = TabAPI.getInstance().getPlaceholderManager().findReplacement(pl.getIdentifier(), value);
-        if (newValue.contains("%value%"))
-            newValue = newValue.replace("%value%", value);
-
-        return newValue;
     }
 
     public static Map<Action,String> map(Object action) {

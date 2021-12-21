@@ -4,6 +4,7 @@ import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
+import me.neznamy.tab.platforms.bukkit.event.TabLoadEvent;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -11,7 +12,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -27,6 +27,11 @@ public class EventActions implements Listener {
     public void onJoin(TabPlayer p) {
         if (disabled("player-join")) return;
         onEvent(p,"player-join",Map.of());
+    }
+
+    @EventHandler
+    public void onTabReload(TabLoadEvent e) {
+        ARMenu.get().reload();
     }
 
     @EventHandler
