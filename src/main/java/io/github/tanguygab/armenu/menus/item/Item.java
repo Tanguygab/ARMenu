@@ -248,7 +248,9 @@ public class Item {
         String color = "";
 
         if (isSkinMat(mat)) {
-            Object skin = ARMenu.get().getMenuManager().skins.getSkin(mat);
+            Object skin = null;
+            try {skin = ARMenu.get().getMenuManager().skins.getSkin(mat);}
+            catch (Exception ignored) {}
             if (skin == null)
                 return air;
             item = getSkull(skin);

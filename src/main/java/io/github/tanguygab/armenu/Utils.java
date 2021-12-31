@@ -82,4 +82,9 @@ public class Utils {
             frame = frame-length;
         return frame;
     }
+
+    public static int slotNMStoSpigot(int slot) {
+        if (slot > 35 && slot < 45) return slot-36;
+        return slot;
+    }
 }

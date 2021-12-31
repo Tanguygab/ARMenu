@@ -99,8 +99,10 @@ public class MenuSession {
         }
 
         task = TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,"refreshing ARMenu menu for player "+p.getName(),ARMenu.get().getMenuManager(),"refreshing",()->{
-            if (ARMenu.get().getMenuManager().config.getBoolean("refresh",false))
+            if (ARMenu.get().getMenuManager().config.getBoolean("refresh",false)) {
                 sendPackets(true);
+                frame = frame == 10000 ? 0 : frame+0.5;
+            }
         });
     }
 
@@ -206,9 +208,8 @@ public class MenuSession {
 
         list.addAll(getInventoryProperties());
 
-        list.add(new PacketPlayOutWindowItems(66, 1, pageItems, ItemStack.b));
+        list.add(new PacketPlayOutWindowItems(66, 1, pageItems, heldItemStack));
 
-        this.frame = frame == 10000 ? 0 : this.frame+0.5;
         return list;
     }
 
@@ -321,10 +322,10 @@ public class MenuSession {
                 currentItems.put(placedSlot, newItem);
                 placedItems.put(placedSlot,placedItem);
 
-                int index = placedSlot-page.getLayoutSize()+9;
-                if (index >= 36 && index < 45) index -= 36;
+                int index = placedSlot-page.getLayoutSize();
+                if (index >= 0)
+                    ((Player)p.getPlayer()).getInventory().setItem(Utils.slotNMStoSpigot(index+9),newItem instanceof InvItem i ? i.itemStack : null);
 
-                ((Player)p.getPlayer()).getInventory().setItem(index,newItem instanceof InvItem i ? i.itemStack : null);
             }
         });
 
@@ -339,9 +340,8 @@ public class MenuSession {
         sendPackets(false);
     }
 
-    //still being worked on
     public void pickedUpItem(int slot, ItemStack item) {
-        slot += page.getLayoutSize()-9;
+        slot = slot+page.getLayoutSize()-9;
         if (placedItems.containsKey(slot)) return;
 
         if (item == ItemStack.b) {
