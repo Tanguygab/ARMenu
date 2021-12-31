@@ -4,6 +4,7 @@ import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.commands.*;
 import io.github.tanguygab.armenu.menus.menu.MenuManager;
 import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -36,6 +37,8 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
         events = new EventActions(this);
         getServer().getPluginManager().registerEvents(events,this);
         data = new Data();
+
+        TabAPI.getInstance().getEventBus().register(TabLoadEvent.class,e->reload());
     }
 
     @Override
