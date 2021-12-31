@@ -55,42 +55,35 @@ public class Data {
         return "";
     }
 
-    public void setData(String name, String dataname, String value) {
-        if (!data.containsKey(name)) data.put(name,new HashMap<>());
-        if (value == null) data.get(name).remove(dataname);
-        else data.get(name).put(dataname,value);
+    public void setData(String name, String data, String value, boolean temp) {
+        Map<String,Map<String,String>> map = temp ? tempdata : this.data;
+        if (!map.containsKey(name)) map.put(name,new HashMap<>());
+        if (value == null) map.get(name).remove(data);
+        else map.get(name).put(data,value);
 
-        updatePlaceholder(name,dataname);
+        updatePlaceholder(name,data);
     }
 
-    public void setTempData(String name, String dataname, String value) {
-        if (!tempdata.containsKey(name)) tempdata.put(name,new HashMap<>());
-        if (value == null) data.get(name).remove(dataname);
-        else tempdata.get(name).put(dataname,value);
-
-        updatePlaceholder(name,dataname);
+    public void removeData(String name, String data) {
+        setData(name,data,null,false);
+        setData(name,data,null,true);
     }
 
-    public void removeData(String name, String dataname) {
-        setData(name,dataname,null);
-        setTempData(name,dataname,null);
-    }
-
-    private void updatePlaceholder(String name, String dataname) {
+    private void updatePlaceholder(String name, String data) {
         PlaceholderManagerImpl pm = TAB.getInstance().getPlaceholderManager();
         TabPlayer p = TabAPI.getInstance().getPlayer(name);
 
 
         if (name.equals("global")) {
-            if (pm.getPlaceholder("%global-data-"+dataname+"%") == null)
-                pm.registerServerPlaceholder("%global-data-"+dataname+"%",-1,()->getData("global",dataname)).enableTriggerMode();
-            ((ServerPlaceholder)pm.getPlaceholder("%global-data-"+dataname+"%")).updateValue(getData(name,dataname));
+            if (pm.getPlaceholder("%global-data-"+data+"%") == null)
+                pm.registerServerPlaceholder("%global-data-"+data+"%",-1,()->getData("global",data)).enableTriggerMode();
+            ((ServerPlaceholder)pm.getPlaceholder("%global-data-"+data+"%")).updateValue(getData(name,data));
         }
         else {
-            if (pm.getPlaceholder("%data-"+dataname+"%") == null)
-                pm.registerPlayerPlaceholder("%data-"+dataname+"%",-1,player->getData(player.getName(),dataname)).enableTriggerMode();
+            if (pm.getPlaceholder("%data-"+data+"%") == null)
+                pm.registerPlayerPlaceholder("%data-"+data+"%",-1,player->getData(player.getName(),data)).enableTriggerMode();
             if (p != null) {
-                ((PlayerPlaceholder)pm.getPlaceholder("%data-"+dataname+"%")).updateValue(p,getData(name,dataname));
+                ((PlayerPlaceholder)pm.getPlaceholder("%data-"+data+"%")).updateValue(p,getData(name,data));
             }
         }
     }

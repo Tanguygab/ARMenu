@@ -32,6 +32,6 @@ public class SetTempDataAction extends Action {
         String name = args[0];
         String data = args[1];
         String value = args[2];
-        ARMenu.get().data.setTempData(name,data,value);
+        ARMenu.get().data.setData(name,data,value,true);
     }
 }
