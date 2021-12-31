@@ -27,6 +27,8 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
     public void onEnable() {
         plugin = this;
         namespacedKey = new NamespacedKey(this,"armenu-item-id");
+        getServer().getMessenger().unregisterOutgoingPluginChannel(this);
+
         mm = new MenuManager();
         TabAPI.getInstance().getFeatureManager().registerFeature(mm.getFeatureName(),mm);
         itemStorage = new ItemStorage();

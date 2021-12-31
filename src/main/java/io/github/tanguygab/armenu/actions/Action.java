@@ -1,6 +1,7 @@
 package io.github.tanguygab.armenu.actions;
 
 import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.actions.bungee.ServerAction;
 import io.github.tanguygab.armenu.actions.commands.*;
 import io.github.tanguygab.armenu.actions.data.RemoveDataAction;
 import io.github.tanguygab.armenu.actions.data.SetDataAction;
@@ -50,6 +51,8 @@ public abstract class Action {
 
     public static void registerAll() {
         Action.register(
+                new ServerAction(),
+
                 new ConsoleAction(),
                 new PlayerAction(),
 
