@@ -149,6 +149,9 @@ public class MenuManager extends TabFeature {
             session.onMenuButton(buttonId);
             return true;
         }
+        if (packet instanceof PacketPlayInCloseWindow close && close.b() == 66 && (session = sessions.get(p)) != null) {
+            session.onClose();
+        }
         return false;
     }
 

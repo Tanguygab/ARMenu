@@ -33,8 +33,8 @@ public class Menu {
     public String getName() {
         return name;
     }
-    public List<String> getTitles() {
-        return titles;
+    public String getTitle(int frame) {
+        return titles.get(Utils.frame(frame,titles.size()));
     }
     public Map<String,Page> getPages() {
         return pages;

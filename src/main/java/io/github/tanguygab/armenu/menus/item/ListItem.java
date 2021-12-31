@@ -91,7 +91,7 @@ public class ListItem extends Item {
         String listItem = list[1];
         Map<String,String> replacements = replacements(p,page,slot,listPos,listItem);
 
-        List<String> lore = new ArrayList<>(this.lores.get(frame));
+        List<String> lore = new ArrayList<>(this.lores.get(Utils.frame(frame,lores.size())));
         lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,replacements)));
 
         Map<String,String> enchants = new HashMap<>(this.enchants);
@@ -108,9 +108,9 @@ public class ListItem extends Item {
             attributes.put(placeholders(attribute,p,replacements),cfg);
         });
 
-        return getItem(placeholders(materials.get(frame),p,replacements),
-                names.isEmpty() ? null : placeholders(names.get(frame),p,replacements),
-                amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,replacements),
+        return getItem(placeholders(materials.get(Utils.frame(frame,materials.size())),p,replacements),
+                names.isEmpty() ? null : placeholders(names.get(Utils.frame(frame,names.size())),p,replacements),
+                amounts.isEmpty() ? null : placeholders(amounts.get(Utils.frame(frame,amounts.size())),p,replacements),
                 lore,
                 enchants,
                 flags,

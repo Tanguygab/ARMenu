@@ -31,6 +31,7 @@ public class Item {
 
     public final String name;
     public final Map<String,Object> config;
+    protected int refresh;
 
     protected List<String> names;
     protected List<String> amounts;
@@ -50,17 +51,17 @@ public class Item {
         this.name = name;
         this.config = config;
 
-        if (config != null) {
-            names = getNames();
-            amounts = getAmounts();
-            materials = getMaterials();
-            lores = getLores();
-            slots = getSlots();
-            enchants = getEnchants();
-            flags = getFlags();
-            attributes = getAttributes();
-            isMovable = (boolean) config.getOrDefault("movable", false);
-        }
+        if (config == null) return;
+        refresh = (int) config.getOrDefault("refresh",0);
+        names = getNames();
+        amounts = getAmounts();
+        materials = getMaterials();
+        lores = getLores();
+        slots = getSlots();
+        enchants = getEnchants();
+        flags = getFlags();
+        attributes = getAttributes();
+        isMovable = (boolean) config.getOrDefault("movable", false);
     }
 
     public String getConfigName() {
@@ -71,8 +72,8 @@ public class Item {
         List<List<String>> list = new ArrayList<>();
         if (slots.containsKey(page.getName()))
             list.addAll(slots.get(page.getName()));
-        if (slots.containsKey("__ALL__"))
-            list.addAll(slots.get("__ALL__"));
+        if (slots.containsKey("_DEFAULT_"))
+            list.addAll(slots.get("_DEFAULT_"));
         return list;
     }
 
@@ -123,7 +124,7 @@ public class Item {
 
         Object opt = config.get("slot");
         if (opt instanceof String || opt instanceof Integer) {
-            map.put("__ALL__",List.of(List.of(opt+"")));
+            map.put("_DEFAULT_",List.of(List.of(opt+"")));
             return map;
         }
         Map<String,Object> slots = (Map<String, Object>) opt;
@@ -131,10 +132,13 @@ public class Item {
 
         slots.forEach((page,slot)->{
             List<List<String>> list = new ArrayList<>();
-            ((List<?>)slot).forEach(s -> {
-                if (s instanceof List<?>)
-                    list.add((List<String>) s);
-                else list.add(List.of(s+""));
+            ((List<?>)slot).forEach(l -> {
+                if (l instanceof List<?>) { // to account for direct ints in cfg
+                    List<String> strs = new ArrayList<>();
+                    ((List<?>) l).forEach(s->strs.add(s+""));
+                    list.add(strs);
+                }
+                else list.add(List.of(l+""));
             });
 
             map.put(page,list);
@@ -207,7 +211,7 @@ public class Item {
 
         Map<String,String> replacements = replacements(p,page,slot);
 
-        List<String> lore = new ArrayList<>(this.lores.get(frame));
+        List<String> lore = new ArrayList<>(lores.get(Utils.frame(frame,lores.size())));
         lore.forEach(l->lore.set(lore.indexOf(l),placeholders(l,p,replacements)));
 
         Map<String,String> enchants = new HashMap<>(this.enchants);
@@ -224,9 +228,9 @@ public class Item {
             attributes.put(placeholders(attribute,p,replacements),cfg);
         });
 
-        return getItem(placeholders(materials.get(frame),p,replacements),
-                names.isEmpty() ? null : placeholders(names.get(frame),p,replacements),
-                amounts.isEmpty() ? null : placeholders(amounts.get(frame),p,replacements),
+        return getItem(placeholders(materials.get(Utils.frame(frame,materials.size())),p,replacements),
+                names.isEmpty() ? null : placeholders(names.get(Utils.frame(frame,names.size())),p,replacements),
+                amounts.isEmpty() ? null : placeholders(amounts.get(Utils.frame(frame,amounts.size())),p,replacements),
                 lore,
                 enchants,
                 flags,

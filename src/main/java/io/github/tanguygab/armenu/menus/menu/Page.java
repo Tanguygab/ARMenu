@@ -106,7 +106,7 @@ public class Page {
 
         setslots.forEach(item->
                 item.getSlots(this).forEach(list->{
-                    String slot = list.get(frame);
+                    String slot = list.get(Utils.frame(frame,list.size()));
                     if (slot == null) return;
                     slot = Utils.parsePlaceholders(slot,p);
                     try {
@@ -116,6 +116,7 @@ public class Page {
                         map.put(item,l);
                     } catch (Exception ignored) {}
         }));
+
         return map;
     }
 

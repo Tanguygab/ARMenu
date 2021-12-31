@@ -29,6 +29,7 @@ public class MenuSession {
     private final TabPlayer p;
     private final Menu menu;
     private RepeatingTask task;
+    private double frame = 0;
 
     private Page page;
     private final List<String> arguments;
@@ -36,6 +37,7 @@ public class MenuSession {
     private NonNullList<ItemStack> lastSentItems = null;
     private final List<PacketPlayOutWindowData> customInventoryProperties = new ArrayList<>();
 
+    public final List<Integer> oldSetSlots = new ArrayList<>();
     public final Map<Integer,Item> currentItems = new HashMap<>();
 
     public final Map<Integer,Item> playerInventoryOnOpen = new HashMap<>();
@@ -176,11 +178,11 @@ public class MenuSession {
     }
 
     public List<Packet<PacketListenerPlayOut>> getInventoryPackets() {
-        int frame = 0;
+        int frame = (int) this.frame;
 
         List<Packet<PacketListenerPlayOut>> list = new ArrayList<>();
 
-        IChatBaseComponent title = IChatBaseComponent.a(menu.getTitles().get(frame));
+        IChatBaseComponent title = IChatBaseComponent.a(menu.getTitle(frame));
         InventoryType type = menu.getType() != null ? menu.getType() : InventoryType.get("" + page.getLayoutSize());
         if (type == null)
             type = InventoryType.NORMAL_54;
@@ -188,7 +190,12 @@ public class MenuSession {
 
         NonNullList<ItemStack> pageItems = NonNullList.a();
 
-        page.getSetSlots(p,frame).forEach((item,slots)-> slots.forEach(slot-> currentItems.put(slot,item)));
+        oldSetSlots.forEach(slot->currentItems.put(slot,null));
+        oldSetSlots.clear();
+        page.getSetSlots(p,frame).forEach((item,slots)-> slots.forEach(slot-> {
+            currentItems.put(slot,item);
+            oldSetSlots.add(slot);
+        }));
 
         currentItems.forEach((slot, item) -> {
             if (item != null)
@@ -201,6 +208,7 @@ public class MenuSession {
 
         list.add(new PacketPlayOutWindowItems(66, 1, pageItems, ItemStack.b));
 
+        this.frame = frame == 10000 ? 0 : this.frame+0.5;
         return list;
     }
 

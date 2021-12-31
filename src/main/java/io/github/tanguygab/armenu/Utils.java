@@ -76,4 +76,10 @@ public class Utils {
         try {return Integer.parseInt(arg);}
         catch (Exception e) {return i;}
     }
+
+    public static int frame(int frame, int length) {
+        while (frame >= length)
+            frame = frame-length;
+        return frame;
+    }
 }
