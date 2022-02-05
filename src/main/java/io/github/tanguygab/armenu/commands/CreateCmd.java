@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
@@ -54,7 +55,6 @@ public class CreateCmd {
     public void addItem(ItemStack item, int slot) {
         if (slot >= type.getSize() || slot == -999 || slot == -1) return;
 
-        p.sendMessage(item+" "+slot,false);
         for (int i : items.keySet()) {
             if (i != slot) continue;
             ItemStack it = items.get(i);
@@ -95,7 +95,6 @@ public class CreateCmd {
                 c++;
             }
 
-            p.sendMessage(items+"",false);
             List<String> layout = new ArrayList<>();
 
 
@@ -105,8 +104,8 @@ public class CreateCmd {
 
                 addChar(ch,i,layout);
             }
-            System.out.println(layout);
             config.set("pages.page1.menu-layout",layout);
+            ((Player)p.getPlayer()).updateInventory();
         } catch (IOException e) {
             e.printStackTrace();
         }
