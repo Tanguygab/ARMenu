@@ -105,7 +105,8 @@ public class ItemCmd {
         if (sender instanceof Player) {
             IChatBaseComponent sub = Utils.newComp(name);
             sub.getModifier().onHoverShowItem(getItemStack(item));
-            IChatBaseComponent comp = Utils.newComp(txt+" ").addExtra(sub);
+            IChatBaseComponent comp = Utils.newComp(txt+" ");
+            comp.addExtra(sub);
             if (!txt2.equals("")) comp.addExtra(Utils.newComp(" "+txt2+" "+p.getName()));
             TAB.getInstance().getPlayer(((Player) sender).getUniqueId()).sendMessage(comp);
         }
