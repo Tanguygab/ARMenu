@@ -184,7 +184,7 @@ public class MenuSession {
 
         List<Packet<PacketListenerPlayOut>> list = new ArrayList<>();
 
-        IChatBaseComponent title = IChatBaseComponent.a(menu.getTitle(frame));
+        IChatBaseComponent title = Utils.rgbComp(menu.getTitle(frame));
         InventoryType type = menu.getType() != null ? menu.getType() : InventoryType.get("" + page.getLayoutSize());
         if (type == null)
             type = InventoryType.NORMAL_54;
@@ -238,24 +238,24 @@ public class MenuSession {
                         .forEach((ac,str)->Action.execute(str,ac,p)));
     }
 
-    public boolean onClickPacket(int slot, ClickType click, ItemStack held, Map<Integer,ItemStack> placed) {
+    public void onClickPacket(int slot, ClickType click, ItemStack held, Map<Integer,ItemStack> placed) {
+        boolean updateLastItems = true;
         menu.onEvent(p, "events.click", click+"", (slot + "").replace("-999", "out").replace("-1", "border"));
 
         if (slot == -999 || slot == -1) {
             sendPackets(false);
-            return true;
+            return;
         }
 
         if (click == ClickType.OFFHAND || click == ClickType.DROP_KEY || click == ClickType.CONTROL_DROP_KEY || click == ClickType.DOUBLE_CLICK) {
             execute(currentItems.get(slot),click,slot);
             sendPackets(false);
-            return true;
+            return;
         }
-
 
         if (click.getNames().get(0).startsWith("num_")) {
             List<Integer> slots = new ArrayList<>(placed.keySet());
-            if (slots.isEmpty()) return true;
+            if (slots.isEmpty()) return;
             int slot1 = slots.get(0);
             int slot2 = slots.get(1);
             org.bukkit.inventory.ItemStack itemStack1 = CraftItemStack.asBukkitCopy(placed.get(slot1));
@@ -265,7 +265,7 @@ public class MenuSession {
             execute(currentItems.get(slot),click,slot);
             if ((item1 != null && !item1.isMovable()) || (item2 != null && !item2.isMovable())) {
                 sendPackets(false);
-                return true;
+                return;
             }
             PlayerInventory inv = ((Player)p.getPlayer()).getInventory();
 
@@ -284,7 +284,7 @@ public class MenuSession {
                 currentItems.put(slot2,item1);
                 lastSentItems.set(slot2,placed.get(slot2));
             } else inv.setItem(index2,new org.bukkit.inventory.ItemStack(Material.AIR));
-            return true;
+            return;
         }
 
 
@@ -296,18 +296,23 @@ public class MenuSession {
             execute(currentHeldItem,click,slot);
             if (!currentHeldItem.isMovable()) {
                 sendPackets(false);
-                return true;
+                return;
             }
         }
 
 
-        placed.forEach((placedSlot, placedItem) -> {
+        for (int placedSlot : placed.keySet()) {
+            ItemStack placedItem = placed.get(placedSlot);
             Item itemAtSlot = currentItems.get(placedSlot);
             execute(itemAtSlot,click,slot);
 
             if (itemAtSlot == null || itemAtSlot.isMovable()) {
                 Item newItem = heldItem;
                 if (heldItem instanceof InvItem item) {
+                    if (placedSlot < page.getLayoutSize()) {
+                        updateLastItems = false;
+                        continue;
+                    }
                     if (item.itemStack != null && item.itemStack.getAmount() != heldCount) {
                         newItem = item.split(placedItem.I(), placedSlot);
 
@@ -327,12 +332,13 @@ public class MenuSession {
                     ((Player)p.getPlayer()).getInventory().setItem(Utils.slotNMStoSpigot(index+9),newItem instanceof InvItem i ? i.itemStack : null);
 
             }
-        });
+        }
 
-        heldItemStack = held;
-        heldItem = currentHeldItem;
+        if (updateLastItems) {
+            heldItemStack = held;
+            heldItem = currentHeldItem;
+        }
         updateLastSentItems();
-        return true;
     }
 
     public void updateLastSentItems() {
