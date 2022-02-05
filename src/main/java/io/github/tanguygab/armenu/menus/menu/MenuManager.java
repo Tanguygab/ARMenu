@@ -142,7 +142,8 @@ public class MenuManager extends TabFeature {
             }
 
             ClickType clickType = ClickType.get(mode,button,slot);
-            return session.onClickPacket(slot,clickType,item,placed);
+            session.onClickPacket(slot,clickType,item,placed);
+            return true;
         }
         if (packet instanceof PacketPlayInEnchantItem click && click.b() == 66 && (session = sessions.get(p)) != null) {
             int buttonId = click.c();
