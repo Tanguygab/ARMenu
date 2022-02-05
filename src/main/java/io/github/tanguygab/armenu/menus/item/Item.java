@@ -368,7 +368,6 @@ public class Item {
             });
             nmsItem.a("display").a("Lore",list);
         }
-        System.out.println(nmsItem.a("display").toString());
         return nmsItem;
     }
 
