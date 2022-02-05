@@ -38,7 +38,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
         getServer().getPluginManager().registerEvents(events,this);
         data = new Data();
 
-        TabAPI.getInstance().getEventBus().register(TabLoadEvent.class,e->reload());
+        TabAPI.getInstance().getEventBus().register(TabLoadEvent.class,e->{if (isEnabled()) reload();});
     }
 
     @Override
