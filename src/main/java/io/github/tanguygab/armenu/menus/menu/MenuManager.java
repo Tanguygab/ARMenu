@@ -115,13 +115,13 @@ public class MenuManager extends TabFeature {
         // menu creator
         if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && creators.containsKey(p)) {
             CreateCmd creator = creators.get(p);
-            ItemStack placed = ItemStack.b;
+            Map<Integer,ItemStack> placed;
             try {
-                Object map = click.getClass().getDeclaredMethod("f").invoke(click);
-                placed = (ItemStack) map.getClass().getMethod("getOrDefault", int.class, Object.class).invoke(map,click.c(),ItemStack.b);
+                placed = (Map<Integer, ItemStack>) click.getClass().getDeclaredMethod("f").invoke(click);
+            } catch (Exception e) {
+                placed = new HashMap<>();
             }
-            catch (Exception e) {e.printStackTrace();}
-            creator.addItem(placed,click.c());
+            placed.forEach((i,item)->creator.addItem(item,i));
         }
         if (packet instanceof PacketPlayInCloseWindow click && click.b() == 66 && creators.containsKey(p)) {
             CreateCmd creator = creators.get(p);

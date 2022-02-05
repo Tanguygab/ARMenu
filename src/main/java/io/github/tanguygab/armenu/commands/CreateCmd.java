@@ -12,13 +12,11 @@ import net.minecraft.world.item.ItemStack;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CreateCmd {
 
@@ -56,6 +54,17 @@ public class CreateCmd {
     public void addItem(ItemStack item, int slot) {
         if (slot >= type.getSize() || slot == -999 || slot == -1) return;
 
+        p.sendMessage(item+" "+slot,false);
+        for (int i : items.keySet()) {
+            if (i != slot) continue;
+            ItemStack it = items.get(i);
+            if (CraftItemStack.asBukkitCopy(item).isSimilar(CraftItemStack.asBukkitCopy(it))) {
+                int count = it.I() + item.I();
+                if (count > 64) count = 64;
+                it.e(count);
+                return;
+            }
+        }
         items.put(slot,item);
     }
 
@@ -76,32 +85,43 @@ public class CreateCmd {
                 org.bukkit.inventory.ItemStack i = CraftItemStack.asBukkitCopy(item);
                 config.set("items."+c+".material",i.getType().toString());
                 config.set("items."+c+".amount",i.getAmount());
+                ItemMeta meta = i.getItemMeta();
+                if (meta.hasDisplayName())
+                    config.set("items."+c+".name",meta.getDisplayName());
+                if (meta.hasLore())
+                    config.set("items."+c+".lore",meta.getLore());
                 for (Enchantment enchant : i.getEnchantments().keySet())
                     config.set("items."+c+".enchantments."+enchant.getKey().getKey(),i.getEnchantmentLevel(enchant));
                 c++;
             }
 
+            p.sendMessage(items+"",false);
             List<String> layout = new ArrayList<>();
+
+
             for (int i = 0; i < type.getSize(); i++) {
+
                 String ch = chars.containsKey(i) ? chars.get(i)+"" : "";
 
-                if (i < 9) setChatToLayout(ch,0,layout);
-                if (i < 18) setChatToLayout(ch,1,layout);
-                if (i < 27) setChatToLayout(ch,2,layout);
-                if (i < 36) setChatToLayout(ch,3,layout);
-                if (i < 45) setChatToLayout(ch,4,layout);
-                if (i < 54) setChatToLayout(ch,5,layout);
-                config.set("layout",layout);
+                addChar(ch,i,layout);
             }
+            System.out.println(layout);
+            config.set("pages.page1.menu-layout",layout);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void setChatToLayout(String ch, int i, List<String> layout) {
-        if (layout.size() > i)
-            layout.set(i,layout.get(i)+","+ch);
-        else layout.add(ch);
+    public void addChar(String ch, int i, List<String> layout) {
+        int line = i/9;
+        while (layout.size() <= line) layout.add("");
+        String str = layout.get(line);
+        List<String> currentLine = new ArrayList<>(Arrays.asList(str.split(",")));
+        int pos = i-9*line;
+        while (currentLine.size() <= pos) currentLine.add("");
+        currentLine.set(pos,ch);
+
+        layout.set(line,String.join(",",currentLine));
     }
 
 
