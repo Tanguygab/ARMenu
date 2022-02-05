@@ -3,6 +3,7 @@ package io.github.tanguygab.armenu;
 import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.chat.ChatModifier;
 import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.PropertyImpl;
@@ -86,5 +87,13 @@ public class Utils {
     public static int slotNMStoSpigot(int slot) {
         if (slot > 35 && slot < 45) return slot-36;
         return slot;
+    }
+
+    public static net.minecraft.network.chat.IChatBaseComponent rgbComp(String text) {
+        IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(EnumChatFormat.color(text));
+        ChatModifier modifier = comp.getModifier();
+        if (modifier.getItalic() == null)
+            modifier.setItalic(false);
+        return net.minecraft.network.chat.IChatBaseComponent.ChatSerializer.a(comp.toString());
     }
 }

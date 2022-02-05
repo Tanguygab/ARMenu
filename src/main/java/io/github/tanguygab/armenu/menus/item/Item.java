@@ -9,6 +9,9 @@ import io.github.tanguygab.armenu.menus.menu.Page;
 import io.th0rgal.oraxen.items.OraxenItems;
 import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.network.chat.IChatBaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -301,12 +304,6 @@ public class Item {
                 item.getItemMeta().setCustomModelData(modelData);
         }
 
-        if (name != null) meta.setDisplayName(name);
-        if (!lore.isEmpty()) {
-            String lore1 = String.join("\n",lore);
-            meta.setLore(List.of(lore1.split("\n")));
-        }
-
         if (!enchants.isEmpty()) enchants.forEach((enchant,lvl)->{
             Enchantment e = Enchantment.getByKey(NamespacedKey.minecraft(enchant.toLowerCase().replace(" ","_")));
             if (e == null) return;
@@ -357,6 +354,21 @@ public class Item {
             if (color1 != -1)
                 ((NBTTagCompound)nmsItem.s().c("display")).a("color",color1);
         }
+        if (name != null) nmsItem.a(Utils.rgbComp(name));
+        if (!lore.isEmpty()) {
+            String lore1 = String.join("\n",lore);
+            List<String> strs = List.of(lore1.split("\\n"));
+
+            NBTTagList list = new NBTTagList();
+            strs.forEach(s->{
+                IChatBaseComponent comp = Utils.rgbComp(s);
+                String json = IChatBaseComponent.ChatSerializer.a(comp);
+                NBTTagString str = NBTTagString.a(json);
+                list.add(str);
+            });
+            nmsItem.a("display").a("Lore",list);
+        }
+        System.out.println(nmsItem.a("display").toString());
         return nmsItem;
     }
 
