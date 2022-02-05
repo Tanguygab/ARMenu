@@ -28,7 +28,7 @@ public class EventActions implements Listener {
         onEvent(p,"player-join",Map.of());
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntity(PlayerInteractEntityEvent e) {
         if (disabled("entity-click")) return;
 
@@ -45,8 +45,8 @@ public class EventActions implements Listener {
         e.setCancelled(onEvent(TabAPI.getInstance().getPlayer(p.getUniqueId()), "entity-click",map));
     }
 
-    @EventHandler
-    public void onItem(PlayerInteractEvent e) {
+    @EventHandler(ignoreCancelled = true)
+    public void onClick(PlayerInteractEvent e) {
         if (disabled("click")) return;
 
         Player p = e.getPlayer();
