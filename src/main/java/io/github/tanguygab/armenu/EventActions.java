@@ -47,12 +47,12 @@ public class EventActions implements Listener {
 
     @EventHandler
     public void onItem(PlayerInteractEvent e) {
-        if (disabled("item-click") || e.getItem() == null) return;
+        if (disabled("click")) return;
 
         Player p = e.getPlayer();
         ItemStack item = e.getItem();
-        String type = item.getType().getKey().getKey().replace("_"," ");
-        String name = item.getItemMeta() == null || !item.getItemMeta().hasDisplayName() ? type : item.getItemMeta().getDisplayName();
+        String type = item == null ? "" : item.getType().getKey().getKey().replace("_"," ");
+        String name = item == null ? "" : item.getItemMeta() == null || !item.getItemMeta().hasDisplayName() ? type : item.getItemMeta().getDisplayName();
 
         Map<String,String> map = new HashMap<>();
         map.put("%hand%",e.getHand().toString().toLowerCase().replace("_"," "));
@@ -72,7 +72,7 @@ public class EventActions implements Listener {
         map.put("%block%",block);
         map.put("%action%",action);
 
-        e.setCancelled(onEvent(TabAPI.getInstance().getPlayer(p.getUniqueId()), "item-click",map));
+        e.setCancelled(onEvent(TabAPI.getInstance().getPlayer(p.getUniqueId()), "click",map));
     }
 
     private boolean disabled(String name) {
