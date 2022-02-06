@@ -116,11 +116,8 @@ public class MenuManager extends TabFeature {
         if (packet instanceof PacketPlayInWindowClick click && click.b() == 66 && creators.containsKey(p)) {
             CreateCmd creator = creators.get(p);
             Map<Integer,ItemStack> placed;
-            try {
-                placed = (Map<Integer, ItemStack>) click.getClass().getDeclaredMethod("f").invoke(click);
-            } catch (Exception e) {
-                placed = new HashMap<>();
-            }
+            try {placed = (Map<Integer, ItemStack>) click.getClass().getDeclaredMethod("f").invoke(click);}
+            catch (Exception e) {placed = new HashMap<>();}
             placed.forEach((i,item)->creator.addItem(item,i));
         }
         if (packet instanceof PacketPlayInCloseWindow click && click.b() == 66 && creators.containsKey(p)) {
@@ -135,11 +132,8 @@ public class MenuManager extends TabFeature {
             InventoryClickType mode = click.g();
             ItemStack item = click.e();
             Map<Integer,ItemStack> placed;
-            try {
-                placed = (Map<Integer, ItemStack>) click.getClass().getDeclaredMethod("f").invoke(click);
-            } catch (Exception e) {
-                placed = new HashMap<>();
-            }
+            try {placed = (Map<Integer, ItemStack>) click.getClass().getDeclaredMethod("f").invoke(click);}
+            catch (Exception e) {placed = new HashMap<>();}
 
             ClickType clickType = ClickType.get(mode,button,slot);
             session.onClickPacket(slot,clickType,item,placed);
