@@ -5,6 +5,7 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,6 +42,10 @@ public class EventActions implements Listener {
         map.put("%hand%",e.getHand().toString().toLowerCase().replace("_"," "));
         map.put("%entity%",name);
         map.put("%entity-type%",type);
+        Location loc = entity.getLocation();
+        map.put("%x%",loc.getX()+"");
+        map.put("%y%",loc.getY()+"");
+        map.put("%z%",loc.getZ()+"");
 
         e.setCancelled(onEvent(TabAPI.getInstance().getPlayer(p.getUniqueId()), "entity-click",map));
     }
@@ -62,13 +67,24 @@ public class EventActions implements Listener {
         String action = e.getAction().toString().toLowerCase().replace("_"," ");
         String where = "";
         String block = "";
+        String x = "";
+        String y = "";
+        String z = "";
         if (!action.equals("physical")) {
             where = action.split(" ")[2];
             action = action.replace(" "+where,"");
-            if (e.getClickedBlock() != null && where.equals("block"))
-                block = e.getClickedBlock().getType().getKey().getKey().toLowerCase().replace("_"," ");
+            if (e.getClickedBlock() != null && where.equals("block")) {
+                block = e.getClickedBlock().getType().getKey().getKey().toLowerCase().replace("_", " ");
+                Location loc = e.getClickedBlock().getLocation();
+                x = loc.getX()+"";
+                y = loc.getY()+"";
+                z = loc.getZ()+"";
+            }
         }
         map.put("%where%",where);
+        map.put("%x%",x);
+        map.put("%y%",z);
+        map.put("%z%",y);
         map.put("%block%",block);
         map.put("%action%",action);
 
