@@ -54,17 +54,6 @@ public class CreateCmd {
 
     public void addItem(ItemStack item, int slot) {
         if (slot >= type.getSize() || slot == -999 || slot == -1) return;
-
-        for (int i : items.keySet()) {
-            if (i != slot) continue;
-            ItemStack it = items.get(i);
-            if (CraftItemStack.asBukkitCopy(item).isSimilar(CraftItemStack.asBukkitCopy(it))) {
-                int count = it.I() + item.I();
-                if (count > 64) count = 64;
-                it.e(count);
-                return;
-            }
-        }
         items.put(slot,item);
     }
 
@@ -75,24 +64,34 @@ public class CreateCmd {
             ConfigurationFile config = new YamlConfigurationFile(null,file);
 
             Map<Integer, Character> chars = new HashMap<>();
+            Map<ItemStack, Character> itemsAdded = new HashMap<>();
             char c = 48;
             config.set("title",name);
             config.set("type",type.name.get(0));
+
             for (int slot : items.keySet()) {
                 ItemStack item = items.get(slot);
                 if (item == ItemStack.b) continue;
-                chars.put(slot,c);
+                char ch = c;
+                for (ItemStack it : itemsAdded.keySet()) {
+                    boolean bool = CraftItemStack.asBukkitCopy(item).isSimilar(CraftItemStack.asBukkitCopy(it)) && item.I() == it.I();
+                    if (bool) {
+                        ch = itemsAdded.get(it);
+                        break;
+                    }
+                }
+                chars.put(slot,ch);
+                itemsAdded.put(item,ch);
                 org.bukkit.inventory.ItemStack i = CraftItemStack.asBukkitCopy(item);
-                config.set("items."+c+".material",i.getType().toString());
-                config.set("items."+c+".amount",i.getAmount());
+                config.set("items."+ch+".material",i.getType().toString());
+                config.set("items."+ch+".amount",i.getAmount());
                 ItemMeta meta = i.getItemMeta();
-                if (meta.hasDisplayName())
-                    config.set("items."+c+".name",meta.getDisplayName());
-                if (meta.hasLore())
-                    config.set("items."+c+".lore",meta.getLore());
+                if (meta.hasDisplayName()) config.set("items."+ch+".name",meta.getDisplayName());
+                if (meta.hasLore()) config.set("items."+ch+".lore",meta.getLore());
                 for (Enchantment enchant : i.getEnchantments().keySet())
-                    config.set("items."+c+".enchantments."+enchant.getKey().getKey(),i.getEnchantmentLevel(enchant));
-                c++;
+                    config.set("items."+ch+".enchantments."+enchant.getKey().getKey(),i.getEnchantmentLevel(enchant));
+
+                if (c == ch) c++;
             }
 
             List<String> layout = new ArrayList<>();
