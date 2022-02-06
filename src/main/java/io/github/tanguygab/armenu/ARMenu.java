@@ -2,6 +2,7 @@ package io.github.tanguygab.armenu;
 
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.commands.*;
+import io.github.tanguygab.armenu.events.EventsManager;
 import io.github.tanguygab.armenu.menus.menu.MenuManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
@@ -21,7 +22,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
     private static ARMenu plugin;
     private MenuManager mm;
     private ItemStorage itemStorage;
-    public EventActions events;
+    private EventsManager events;
     public Data data;
     public NamespacedKey namespacedKey;
 
@@ -35,8 +36,8 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
         TabAPI.getInstance().getFeatureManager().registerFeature(mm.getFeatureName(),mm);
         itemStorage = new ItemStorage();
         Action.registerAll();
-        events = new EventActions(this);
-        getServer().getPluginManager().registerEvents(events,this);
+        events = new EventsManager(this);
+        getServer().getPluginManager().registerEvents(events.getListener(),this);
         data = new Data();
 
         for (Player player : getServer().getOnlinePlayers()) player.updateCommands();
@@ -66,6 +67,9 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
     public MenuManager getMenuManager() {
         return mm;
     }
+    public EventsManager getEventsManager() {
+        return events;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -79,6 +83,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
             case "create" -> new CreateCmd(sender,args);
             case "execute" -> new ExecuteCmd(sender,args);
             case "items" -> new ItemCmd(sender, args);
+            case "events" -> new EventsCmd(sender,args);
             case "reload" -> new ReloadCmd(sender);
             case "test" -> sender.sendMessage("Nope :D");
         }
@@ -89,7 +94,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1)
-            return List.of("help","open","list","create","execute","items","reload");
+            return List.of("help","open","list","create","execute","items","events","reload");
         switch (args[0]) {
             case "open" -> {if (args.length == 2) return mm.getMenus();}
             case "execute" -> {if (args.length == 3) return Action.getSugestions(args[2]);}
@@ -99,6 +104,7 @@ public final class ARMenu extends JavaPlugin implements CommandExecutor {
                 if (args.length == 4 && (args[1].equalsIgnoreCase("give") || args[1].equalsIgnoreCase("take")))
                     return List.of("<amount>");
             }
+            case "events" -> {return events.getSuggestions(args);}
         }
         return null;
     }

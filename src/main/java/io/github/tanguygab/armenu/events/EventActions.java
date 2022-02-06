@@ -1,5 +1,7 @@
-package io.github.tanguygab.armenu;
+package io.github.tanguygab.armenu.events;
 
+import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -20,8 +22,8 @@ public class EventActions implements Listener {
 
     private final ConfigurationFile config;
 
-    public EventActions(ARMenu plugin) {
-        config = plugin.getMenuManager().config;
+    public EventActions() {
+        config = ARMenu.get().getMenuManager().config;
     }
 
     public void onJoin(TabPlayer p) {
@@ -83,8 +85,8 @@ public class EventActions implements Listener {
         }
         map.put("%where%",where);
         map.put("%x%",x);
-        map.put("%y%",z);
-        map.put("%z%",y);
+        map.put("%y%",y);
+        map.put("%z%",z);
         map.put("%block%",block);
         map.put("%action%",action);
 

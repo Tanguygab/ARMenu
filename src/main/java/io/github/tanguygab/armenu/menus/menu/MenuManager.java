@@ -73,14 +73,6 @@ public class MenuManager extends TabFeature {
         }
     }
 
-    @Override
-    public void unload() {}
-
-    @Override
-    public void onJoin(TabPlayer p) {
-        ARMenu.get().events.onJoin(p);
-    }
-
     public void newMenuSession(TabPlayer p, Menu menu) {
         newMenuSession(p,menu,null, null);
     }
