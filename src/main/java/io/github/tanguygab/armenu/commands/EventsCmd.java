@@ -44,13 +44,16 @@ public class EventsCmd {
             args2.remove(0);args2.remove(0);args2.remove(0);
             String ex = String.join(" ",args2);
             events.addEvent(type,condition,ex);
+            p.sendMessage("Event added!");
             return;
         }
         if (args.length < 4) {
             p.sendMessage("You have to provide an event to remove!");
             return;
         }
-        events.removeEvent(type,args[3]);
+        boolean removed = events.removeEvent(type,args[3]);
+        if (removed) p.sendMessage("Event removed!");
+        else p.sendMessage("This event doesn't exist!");
     }
 
     public String getCondition(String type, Player p) {
@@ -80,7 +83,7 @@ public class EventsCmd {
                 String x = loc.getX()+"";
                 String y = loc.getY()+"";
                 String z = loc.getZ()+"";
-                return "%entity%="+entityName+";%entity-type%"+entityType+";"+"%x%="+x+";"+"%y%="+y+";"+"%z%="+z;
+                return "%entity%="+entityName+";%entity-type%="+entityType+";"+"%x%="+x+";"+"%y%="+y+";"+"%z%="+z;
             }
             case "item" -> {
                 ItemStack item = p.getInventory().getItemInMainHand();
@@ -90,7 +93,7 @@ public class EventsCmd {
                 }
                 String itemType = item.getType().getKey().getKey().toLowerCase().replace("_", " ");
                 String itemName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : itemType;
-                return "%item%="+itemName+";%item-type%"+itemType;
+                return "%item%="+itemName+";%item-type%="+itemType;
             }
         }
         return "";
