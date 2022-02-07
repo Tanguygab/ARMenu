@@ -25,8 +25,8 @@ public class EventsManager extends TabFeature {
     public static Pattern entityConditionPattern = Pattern.compile("%entity%=(?<entityName>[^;]+);%entity-type%=(?<entityType>[a-z ]+);%x%=(?<x>[0-9.-]+);%y%=(?<y>[0-9.-]+);%z%=(?<z>[0-9.-]+)");
     public List<String> entitySuggestions = new ArrayList<>();
 
-    public static Pattern itemSimplePattern =  Pattern.compile("(?<itemType>[a-z ]+);(?<itemName>[^;]+)");
-    public static Pattern itemConditionPattern = Pattern.compile("%item%=(?<itemName>[^;]+);%item-type%=(?<itemType>[a-z_]+)");
+    public static Pattern itemSimplePattern =  Pattern.compile("(?<itemType>[a-z_]+);(?<itemName>[^;]+)");
+    public static Pattern itemConditionPattern = Pattern.compile("%item%=(?<itemName>[^;]+);%item-type%=(?<itemType>[a-z ]+)");
     public List<String> itemSuggestions = new ArrayList<>();
 
     public EventsManager(ARMenu plugin) {
@@ -46,35 +46,19 @@ public class EventsManager extends TabFeature {
         for (Object obj : clickcfg) {
             if (!(obj instanceof Map<?,?> map)) continue;
             String condition = map.get("condition")+"";
-            Matcher blockMatcher = blockConditionPattern.matcher(condition);
-            if (blockMatcher.find()) {
-                String block = blockMatcher.group("block").replace(" ","_");
-                String x = blockMatcher.group("x");
-                String y = blockMatcher.group("y");
-                String z = blockMatcher.group("z");
-                blockSuggestions.add(x + ";" + y + ";" + z + ":" + block);
+
+            String blockEvent = fromCondition("block",condition);
+            if (blockEvent != null) {
+                blockSuggestions.add(blockEvent);
                 continue;
             }
-            Matcher itemMatcher = itemConditionPattern.matcher(condition);
-            if (itemMatcher.find()) {
-                String name = itemMatcher.group("itemName").replace(" ","_");
-                String type = itemMatcher.group("itemType").replace(" ","_");
-                itemSuggestions.add(type + ";" + name);
-            }
+            String itemEvent = fromCondition("item",condition);
+            if (itemEvent != null) itemSuggestions.add(itemEvent);
         }
         List<Object> entitycfg = (List<Object>) plugin.getMenuManager().config.getObject("event-based-actions.entity-click");
         for (Object obj : entitycfg) {
             if (!(obj instanceof Map<?,?> map)) continue;
-            String condition = map.get("condition")+"";
-            Matcher entityMatcher = entityConditionPattern.matcher(condition);
-            if (!entityMatcher.find()) continue;
-
-            String name = entityMatcher.group("entityName").replace(" ","_");
-            String type = entityMatcher.group("entityType").replace(" ","_");
-            String x = entityMatcher.group("x");
-            String y = entityMatcher.group("y");
-            String z = entityMatcher.group("z");
-            entitySuggestions.add(x + ";" + y + ";" + z + ":" + type + ";" + name);
+            entitySuggestions.add(fromCondition("entity",map.get("condition")+""));
         }
     }
 
@@ -102,8 +86,10 @@ public class EventsManager extends TabFeature {
         for (Object obj : list) {
             if (!(obj instanceof Map<?,?> map)) continue;
             if (condition.equals(map.get("condition"))) {
-                List<Object> actions = (List<Object>) map.get("actions");
+                List<Object> actions = new ArrayList<>((List<Object>) map.get("actions"));
                 actions.add(action);
+                Map<String,Object> map2 = (Map<String, Object>) map;
+                map2.put("actions",actions);
                 plugin.getMenuManager().config.set(path,list);
                 return;
             }
@@ -115,6 +101,11 @@ public class EventsManager extends TabFeature {
             list.remove(list.get(list.size()-1));
         list.add(map);
         list.add("return");
+        switch (type) {
+            case "block" -> blockSuggestions.add(fromCondition(type,condition));
+            case "entity" -> entitySuggestions.add(fromCondition(type,condition));
+            case "item" -> itemSuggestions.add(fromCondition(type,condition));
+        }
 
         plugin.getMenuManager().config.set(path,list);
     }
@@ -140,8 +131,43 @@ public class EventsManager extends TabFeature {
         return false;
     }
 
+    public String fromCondition(String type, String condition) {
+        switch (type) {
+            case "block" -> {
+                Matcher blockMatcher = blockConditionPattern.matcher(condition);
+                if (!blockMatcher.find()) return null;
+
+                String block = blockMatcher.group("block").replace(" ","_");
+                String x = blockMatcher.group("x");
+                String y = blockMatcher.group("y");
+                String z = blockMatcher.group("z");
+                return x + ";" + y + ";" + z + ":" + block;
+            }
+            case "entity" -> {
+                Matcher entityMatcher = entityConditionPattern.matcher(condition);
+                if (!entityMatcher.find()) return null;
+
+                String entityName = entityMatcher.group("entityName").replace(" ","_");
+                String entityType = entityMatcher.group("entityType").replace(" ","_");
+                String x = entityMatcher.group("x");
+                String y = entityMatcher.group("y");
+                String z = entityMatcher.group("z");
+
+                return x + ";" + y + ";" + z + ":" + entityType + ";" + entityName;
+            }
+            case "item" -> {
+                Matcher itemMatcher = itemConditionPattern.matcher(condition);
+                if (!itemMatcher.find()) return null;
+
+                String itemName = itemMatcher.group("itemName").replace(" ","_");
+                String itemType = itemMatcher.group("itemType").replace(" ","_");
+                return itemType + ";" + itemName;
+            }
+        }
+        return null;
+    }
+
     public String toCondition(String type, String event) {
-        String condition = null;
         switch (type) {
             case "block" -> {
                 Matcher blockMatcher = blockSimplePattern.matcher(event);
@@ -151,7 +177,7 @@ public class EventsManager extends TabFeature {
                 String x = blockMatcher.group("x");
                 String y = blockMatcher.group("y");
                 String z = blockMatcher.group("z");
-                condition = "%where%=block;%block%="+block+";"+"%x%="+x+";"+"%y%="+y+";"+"%z%="+z;
+                return "%where%=block;%block%="+block+";"+"%x%="+x+";"+"%y%="+y+";"+"%z%="+z;
             }
             case "entity" -> {
                 Matcher entityMatcher = entitySimplePattern.matcher(event);
@@ -162,17 +188,16 @@ public class EventsManager extends TabFeature {
                 String x = entityMatcher.group("x");
                 String y = entityMatcher.group("y");
                 String z = entityMatcher.group("z");
-                condition = "%entity%="+entityName+";%entity-type%="+entityType+";"+"%x%="+x+";"+"%y%="+y+";"+"%z%="+z;
+                return "%entity%="+entityName+";%entity-type%="+entityType+";"+"%x%="+x+";"+"%y%="+y+";"+"%z%="+z;
             }
             case "item" -> {
                 Matcher itemMatcher = itemSimplePattern.matcher(event);
                 if (!itemMatcher.find()) return null;
                 String itemName = itemMatcher.group("itemName").replace("_"," ");
                 String itemType = itemMatcher.group("itemType").replace("_"," ");
-                condition = "%item%="+itemName+";%item-type%="+itemType;
+                return  "%item%="+itemName+";%item-type%="+itemType;
             }
         }
-
-        return condition;
+        return null;
     }
 }
