@@ -62,7 +62,7 @@ public class EventActions implements Listener {
         String name = item == null ? "" : item.getItemMeta() == null || !item.getItemMeta().hasDisplayName() ? type : item.getItemMeta().getDisplayName();
 
         Map<String,String> map = new HashMap<>();
-        map.put("%hand%",e.getHand().toString().toLowerCase().replace("_"," "));
+        map.put("%hand%",e.getHand() == null ? "" : e.getHand().toString().toLowerCase().replace("_"," "));
         map.put("%item%",name);
         map.put("%item-type%",type);
 
