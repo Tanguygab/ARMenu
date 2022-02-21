@@ -119,8 +119,8 @@ public class EventActions implements Listener {
         for (Map<Action, String> map : list) {
             for (Action ac : map.keySet()) {
                 String str = map.get(ac);
-                if (str.equalsIgnoreCase("return"))
-                    return false;
+                if (str.equalsIgnoreCase("stop")) return true;
+                if (str.equalsIgnoreCase("continue")) return false;
                 Action.execute(str, ac, p);
             }
         }

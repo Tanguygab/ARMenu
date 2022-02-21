@@ -87,7 +87,10 @@ public class EventsManager extends TabFeature {
             if (!(obj instanceof Map<?,?> map)) continue;
             if (condition.equals(map.get("condition"))) {
                 List<Object> actions = new ArrayList<>((List<Object>) map.get("actions"));
+                if (!actions.isEmpty() && actions.get(actions.size()-1).equals("stop"))
+                    actions.remove(actions.get(actions.size()-1));
                 actions.add(action);
+                actions.add("stop");
                 Map<String,Object> map2 = (Map<String, Object>) map;
                 map2.put("actions",actions);
                 plugin.getMenuManager().config.set(path,list);
@@ -96,11 +99,11 @@ public class EventsManager extends TabFeature {
         }
         Map<String,Object> map = new HashMap<>();
         map.put("condition",condition);
-        map.put("actions",List.of(action));
-        if (!list.isEmpty() && list.get(list.size()-1).equals("return"))
+        map.put("actions",List.of(action,"stop"));
+        if (!list.isEmpty() && list.get(list.size()-1).equals("continue"))
             list.remove(list.get(list.size()-1));
         list.add(map);
-        list.add("return");
+        list.add("continue");
         switch (type) {
             case "block" -> blockSuggestions.add(fromCondition(type,condition));
             case "entity" -> entitySuggestions.add(fromCondition(type,condition));

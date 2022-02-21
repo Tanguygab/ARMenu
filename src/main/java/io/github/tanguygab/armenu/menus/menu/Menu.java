@@ -95,9 +95,8 @@ public class Menu {
         for (Map<Action,String> map : list) {
             for (Action ac : map.keySet()) {
                 String str = map.get(ac);
-                if (str.equalsIgnoreCase("return")) {
-                    return false;
-                }
+                if (str.equalsIgnoreCase("stop")) return false;
+                if (str.equalsIgnoreCase("continue")) return true;
                 if (str.equalsIgnoreCase("close") && path.equals("events.close"))
                     continue;
                 Action.execute(str,ac,p);
