@@ -97,7 +97,7 @@ public class MenuSession {
             setPage(newPage);
         }
 
-        task = TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,"refreshing ARMenu menu for player "+p.getName(),ARMenu.get().getMenuManager(),"refreshing",()->{
+        task = TabAPI.getInstance().getThreadManager().startRepeatingMeasuredTask(500,ARMenu.get().getMenuManager(),"refreshing ARMenu menu for player "+p.getName(),()->{
             if (ARMenu.get().getMenuManager().config.getBoolean("refresh",false)) {
                 sendPackets(true);
                 frame = frame == 10000 ? 0 : frame+0.5;
@@ -107,7 +107,7 @@ public class MenuSession {
 
     public void forceCloseMenu() {
         task.cancel();
-        TabAPI.getInstance().getThreadManager().runTaskLater(100,"closing menu for "+p.getName(),()->{
+        TabAPI.getInstance().getThreadManager().runTaskLater(100,ARMenu.get().getMenuManager(),"closing menu for "+p.getName(),()->{
             p.sendPacket(new PacketPlayOutCloseWindow(66));
             ((Player)p.getPlayer()).updateInventory();
         });
