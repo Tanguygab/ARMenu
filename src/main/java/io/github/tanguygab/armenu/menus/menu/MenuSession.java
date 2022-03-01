@@ -18,7 +18,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -258,8 +257,8 @@ public class MenuSession {
             if (slots.isEmpty()) return;
             int slot1 = slots.get(0);
             int slot2 = slots.get(1);
-            org.bukkit.inventory.ItemStack itemStack1 = CraftItemStack.asBukkitCopy(placed.get(slot1));
-            org.bukkit.inventory.ItemStack itemStack2 = CraftItemStack.asBukkitCopy(placed.get(slot2));
+            org.bukkit.inventory.ItemStack itemStack1 = Utils.asBukkitCopy(placed.get(slot1));
+            org.bukkit.inventory.ItemStack itemStack2 = Utils.asBukkitCopy(placed.get(slot2));
             Item item1 = currentItems.get(slot1);
             Item item2 = currentItems.get(slot2);
             execute(currentItems.get(slot),click,slot);

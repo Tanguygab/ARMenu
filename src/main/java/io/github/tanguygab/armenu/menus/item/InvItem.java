@@ -1,11 +1,11 @@
 package io.github.tanguygab.armenu.menus.item;
 
+import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Page;
 import me.neznamy.tab.api.TabPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ public class InvItem extends Item {
     }
     public InvItem(ItemStack item, int slot) {
         super("inv-"+slot,null);
-        itemStack = CraftItemStack.asBukkitCopy(item);
+        itemStack = Utils.asBukkitCopy(item);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class InvItem extends Item {
     }
 
     public ItemStack getItem() {
-        return CraftItemStack.asNMSCopy(itemStack);
+        return Utils.asNMSCopy(itemStack);
     }
 
     @Override

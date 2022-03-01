@@ -1,6 +1,7 @@
 package io.github.tanguygab.armenu.commands;
 
 import io.github.tanguygab.armenu.ARMenu;
+import io.github.tanguygab.armenu.Utils;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryType;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -10,7 +11,6 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.game.PacketPlayOutOpenWindow;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -74,7 +74,7 @@ public class CreateCmd {
                 if (item == ItemStack.b) continue;
                 char ch = c;
                 for (ItemStack it : itemsAdded.keySet()) {
-                    boolean bool = CraftItemStack.asBukkitCopy(item).isSimilar(CraftItemStack.asBukkitCopy(it)) && item.I() == it.I();
+                    boolean bool = Utils.asBukkitCopy(item).isSimilar(Utils.asBukkitCopy(it)) && item.I() == it.I();
                     if (bool) {
                         ch = itemsAdded.get(it);
                         break;
@@ -82,7 +82,7 @@ public class CreateCmd {
                 }
                 chars.put(slot,ch);
                 itemsAdded.put(item,ch);
-                org.bukkit.inventory.ItemStack i = CraftItemStack.asBukkitCopy(item);
+                org.bukkit.inventory.ItemStack i = Utils.asBukkitCopy(item);
                 config.set("items."+ch+".material",i.getType().toString());
                 config.set("items."+ch+".amount",i.getAmount());
                 ItemMeta meta = i.getItemMeta();

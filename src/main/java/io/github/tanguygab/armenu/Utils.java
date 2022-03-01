@@ -6,9 +6,11 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.ChatModifier;
 import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.shared.PropertyImpl;
+import me.neznamy.tab.shared.DynamicText;
 import me.neznamy.tab.shared.TAB;
+import net.minecraft.world.item.ItemStack;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -35,10 +37,14 @@ public class Utils {
         return IChatBaseComponent.fromColoredText(str);
     }
 
+    public static DynamicText newDynamicTextBecauseISuckAtUsingTheseThings(TabPlayer p, String str) {
+        return new DynamicText("",ARMenu.get().getMenuManager(),p,str,"ARMenu");
+    }
+
     public static String parsePlaceholders(String str, TabPlayer p) {
         if (str == null) return "";
         if (!str.contains("%")) return EnumChatFormat.color(str);
-        str = new PropertyImpl(ARMenu.get().getMenuManager(),p,str).get();
+        str = newDynamicTextBecauseISuckAtUsingTheseThings(p,str).get();
         return EnumChatFormat.color(str);
     }
 
@@ -47,15 +53,15 @@ public class Utils {
         for (String pl : list) {
             if (pl.startsWith("%sender:") && sender != null) {
                 String pl2 = pl.replace("%sender:", "%");
-                str = str.replace(pl,new PropertyImpl(ARMenu.get().getMenuManager(),sender,pl2).getFormat(viewer));
+                str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(sender,pl2).getFormat(viewer));
                 continue;
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
                 String pl2 = pl.replace("%viewer:", "%");
-                str = str.replace(pl,new PropertyImpl(ARMenu.get().getMenuManager(),viewer,pl2).getFormat(sender));
+                str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(viewer,pl2).getFormat(sender));
                 continue;
             }
-            str = str.replace(pl,new PropertyImpl(ARMenu.get().getMenuManager(),sender,pl).getFormat(viewer));
+            str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(sender,pl).getFormat(viewer));
         }
         return EnumChatFormat.color(str);
     }
@@ -95,5 +101,13 @@ public class Utils {
         if (modifier.getItalic() == null)
             modifier.setItalic(false);
         return net.minecraft.network.chat.IChatBaseComponent.ChatSerializer.a(comp.toString());
+    }
+
+    public static org.bukkit.inventory.ItemStack asBukkitCopy(ItemStack item) {
+        return CraftItemStack.asBukkitCopy(item);
+    }
+
+    public static ItemStack asNMSCopy(org.bukkit.inventory.ItemStack item) {
+        return CraftItemStack.asNMSCopy(item);
     }
 }

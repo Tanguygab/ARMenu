@@ -17,7 +17,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
@@ -339,20 +338,20 @@ public class Item {
         meta.getPersistentDataContainer().set(ARMenu.get().namespacedKey, PersistentDataType.STRING,name+"-"+slot);
         item.setItemMeta(meta);
 
-        net.minecraft.world.item.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+        net.minecraft.world.item.ItemStack nmsItem = Utils.asNMSCopy(item);
         if (item.getType() == Material.POTION || item.getType() == Material.TIPPED_ARROW) {
             if (!potionEffect.equals(""))
-                nmsItem.s().a("Potion", potionEffect.toLowerCase());
+                nmsItem.t().a("Potion", potionEffect.toLowerCase());
             if (!color.equals("")) {
                 int potionColor = Utils.parseInt(color, -1);
                 if (potionColor != -1)
-                    nmsItem.s().a("CustomPotionColor", potionColor);
+                    nmsItem.t().a("CustomPotionColor", potionColor);
             }
         }
         else if (!color.equals("")) {
             int color1 = Utils.parseInt(color, -1);
             if (color1 != -1)
-                ((NBTTagCompound)nmsItem.s().c("display")).a("color",color1);
+                ((NBTTagCompound)nmsItem.t().c("display")).a("color",color1);
         }
         if (name != null) nmsItem.a(Utils.rgbComp(name));
         if (!lore.isEmpty()) {
