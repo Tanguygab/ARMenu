@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +73,7 @@ public class EventsCmd {
                 return "%where%=block;%block%="+blockType+";"+"%x%="+x+";"+"%y%="+y+";"+"%z%="+z;
             }
             case "entity" -> {
-                Entity entity = null; // need some kind of getTargetEntity
+                Entity entity = getLookingAt(p);
                 if (entity == null) {
                     p.sendMessage("You have to look at an entity!");
                     return null;
@@ -97,6 +98,21 @@ public class EventsCmd {
             }
         }
         return "";
+    }
+
+    // https://www.spigotmc.org/threads/tutorial-get-the-entity-another-entity-is-looking-at.202495/
+    // thank you x)
+    private Entity getLookingAt(Player player) {
+        Vector playerLookDir = player.getEyeLocation().getDirection();
+        Vector playerEyeLoc = player.getEyeLocation().toVector();
+
+        for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
+            Vector entityLoc = entity.getLocation().toVector();
+            Vector playerEntityVec = entityLoc.subtract(playerEyeLoc);
+            float angle = playerLookDir.angle(playerEntityVec);
+            if (angle > 0.2f) return entity;
+        }
+        return null;
     }
 
 }
