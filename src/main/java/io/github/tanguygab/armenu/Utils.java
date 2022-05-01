@@ -9,6 +9,7 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.DynamicText;
 import me.neznamy.tab.shared.TAB;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -29,7 +30,7 @@ public class Utils {
         else {
             if (msg instanceof IChatBaseComponent comp)
                 msg = comp.toLegacyText();
-            TAB.getInstance().getPlatform().sendConsoleMessage(msg+"",true);
+            Bukkit.getServer().getConsoleSender().sendMessage(EnumChatFormat.color(msg+""));
         }
     }
 
