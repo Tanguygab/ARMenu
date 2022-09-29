@@ -11,7 +11,6 @@ import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryProperty;
 import io.github.tanguygab.armenu.menus.menu.InventoryEnums.InventoryType;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.task.RepeatingTask;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
@@ -22,12 +21,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.*;
+import java.util.concurrent.Future;
 
 public class MenuSession {
 
     private final TabPlayer p;
     private final Menu menu;
-    private RepeatingTask task;
+    private Future<?> task;
     private double frame = 0;
 
     private Page page;
@@ -106,7 +106,7 @@ public class MenuSession {
     }
 
     public void forceCloseMenu() {
-        task.cancel();
+        task.cancel(true);
         TabAPI.getInstance().getThreadManager().runTaskLater(100,ARMenu.get().getMenuManager(),"closing menu for "+p.getName(),()->{
             p.sendPacket(new PacketPlayOutCloseWindow(66));
             ((Player)p.getPlayer()).updateInventory();
@@ -128,10 +128,10 @@ public class MenuSession {
     public void sendPackets(boolean refresh) {
         List<Packet<PacketListenerPlayOut>> packets = refresh ? getInventoryPackets() : lastSentPacket;
         MenuManager mm = ARMenu.get().getMenuManager();
-        packets.forEach(packet->p.sendPacket(packet,mm));
+        packets.forEach(p::sendPacket);
         if (!refresh) {
             if (lastSentItems != null)
-                p.sendPacket(new PacketPlayOutWindowItems(66, 1, lastSentItems, heldItemStack),mm);
+                p.sendPacket(new PacketPlayOutWindowItems(66, 1, lastSentItems, heldItemStack));
         }
         lastSentPacket = packets;
     }
@@ -175,7 +175,7 @@ public class MenuSession {
         PacketPlayOutWindowData packet = new PacketPlayOutWindowData(66,prop.getProperty(),value);
         customInventoryProperties.add(packet);
         lastSentPacket.add(packet);
-        p.sendPacket(packet,ARMenu.get().getMenuManager());
+        p.sendPacket(packet);
     }
 
     public List<Packet<PacketListenerPlayOut>> getInventoryPackets() {
@@ -287,7 +287,7 @@ public class MenuSession {
         }
 
 
-        int heldCount = heldItemStack.I();
+        int heldCount = heldItemStack.K();
         placedItems.clear();
 
         Item currentHeldItem = currentItems.get(slot);
@@ -313,9 +313,9 @@ public class MenuSession {
                         continue;
                     }
                     if (item.itemStack != null && item.itemStack.getAmount() != heldCount) {
-                        newItem = item.split(placedItem.I(), placedSlot);
+                        newItem = item.split(placedItem.K(), placedSlot);
 
-                        int amt = heldItemStack.I() - placedItem.I();
+                        int amt = heldItemStack.K() - placedItem.K();
                         if (amt < 0) amt = 1;
                         heldItemStack.e(amt);
                     }

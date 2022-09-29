@@ -11,7 +11,7 @@ import me.neznamy.tab.shared.TAB;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;

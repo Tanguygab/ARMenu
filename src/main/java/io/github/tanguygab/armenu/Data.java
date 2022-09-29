@@ -38,8 +38,8 @@ public class Data {
             if (name.equals("global")) global.addAll(map.keySet());
             else player.addAll(map.keySet());
         });
-        player.forEach(dataname->pm.registerPlayerPlaceholder("%data-"+dataname+"%",-1,p->getData(p.getName(),dataname)).enableTriggerMode());
-        global.forEach(dataname->pm.registerServerPlaceholder("%global-data-"+dataname+"%",-1,()->getData("global",dataname)).enableTriggerMode());
+        player.forEach(dataname->pm.registerPlayerPlaceholder("%data-"+dataname+"%",-1,p->getData(p.getName(),dataname)));
+        global.forEach(dataname->pm.registerServerPlaceholder("%global-data-"+dataname+"%",-1,()->getData("global",dataname)));
 
     }
 
@@ -76,12 +76,12 @@ public class Data {
 
         if (name.equals("global")) {
             if (pm.getPlaceholder("%global-data-"+data+"%") == null)
-                pm.registerServerPlaceholder("%global-data-"+data+"%",-1,()->getData("global",data)).enableTriggerMode();
+                pm.registerServerPlaceholder("%global-data-"+data+"%",-1,()->getData("global",data));
             ((ServerPlaceholder)pm.getPlaceholder("%global-data-"+data+"%")).updateValue(getData(name,data));
         }
         else {
             if (pm.getPlaceholder("%data-"+data+"%") == null)
-                pm.registerPlayerPlaceholder("%data-"+data+"%",-1,player->getData(player.getName(),data)).enableTriggerMode();
+                pm.registerPlayerPlaceholder("%data-"+data+"%",-1,player->getData(player.getName(),data));
             if (p != null) {
                 ((PlayerPlaceholder)pm.getPlaceholder("%data-"+data+"%")).updateValue(p,getData(name,data));
             }

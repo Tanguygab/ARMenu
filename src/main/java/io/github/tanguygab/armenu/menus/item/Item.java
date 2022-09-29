@@ -1,6 +1,7 @@
 package io.github.tanguygab.armenu.menus.item;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.Utils;
@@ -8,11 +9,12 @@ import io.github.tanguygab.armenu.actions.Action;
 import io.github.tanguygab.armenu.menus.menu.Page;
 import io.th0rgal.oraxen.items.OraxenItems;
 import me.neznamy.tab.api.TabPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import me.neznamy.tab.api.protocol.Skin;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.chat.IChatBaseComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -22,7 +24,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionType;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -47,7 +52,7 @@ public class Item {
 
     private final static Pattern customModelDataPattern = Pattern.compile(",MODEL:(?<data>[0-9])");
     private final static Pattern potionEffectPattern = Pattern.compile(",EFFECT:(?<data>[a-zA-Z_]+)");
-    private final static Pattern colorPattern = Pattern.compile(",COLOR:(?<data>[0-9A-Fa-f]+)");
+    private final static Pattern colorPattern = Pattern.compile(",COLOR:(?<data>([0-9]{1,3},){2}[0-9])");
 
     public Item(String name, Map<String,Object> config) {
         this.name = name;
@@ -250,8 +255,12 @@ public class Item {
         String color = "";
 
         if (isSkinMat(mat)) {
-            Object skin = null;
-            try {skin = ARMenu.get().getMenuManager().skins.getSkin(mat);}
+            PropertyMap skin = null;
+            try {
+                Skin s = ARMenu.get().getMenuManager().skins.getSkin(mat);
+                skin = new PropertyMap();
+                skin.put("textures",new Property("textures", s.getValue(), s.getSignature()));
+            }
             catch (Exception ignored) {}
             if (skin == null)
                 return air;
@@ -336,22 +345,28 @@ public class Item {
         });
 
         meta.getPersistentDataContainer().set(ARMenu.get().namespacedKey, PersistentDataType.STRING,name+"-"+slot);
+        if (meta instanceof PotionMeta potion) {
+            try {
+                PotionType effect = PotionType.valueOf(potionEffect);
+                potion.setBasePotionData(new PotionData(effect));
+            } catch (Exception ignored) {}
+
+            if (!color.equals("")) {
+                String[] rgb = color.split(",");
+                int r = Integer.parseInt(rgb[0]);
+                int g = Integer.parseInt(rgb[1]);
+                int b = Integer.parseInt(rgb[2]);
+                potion.setColor(Color.fromBGR(r,g,b));
+            }
+        }
+
         item.setItemMeta(meta);
 
         net.minecraft.world.item.ItemStack nmsItem = Utils.asNMSCopy(item);
-        if (item.getType() == Material.POTION || item.getType() == Material.TIPPED_ARROW) {
-            if (!potionEffect.equals(""))
-                nmsItem.t().a("Potion", potionEffect.toLowerCase());
-            if (!color.equals("")) {
-                int potionColor = Utils.parseInt(color, -1);
-                if (potionColor != -1)
-                    nmsItem.t().a("CustomPotionColor", potionColor);
-            }
-        }
-        else if (!color.equals("")) {
+        if (!color.equals("")) {
             int color1 = Utils.parseInt(color, -1);
             if (color1 != -1)
-                ((NBTTagCompound)nmsItem.t().c("display")).a("color",color1);
+                nmsItem.b("display").a("color",color1);
         }
         if (name != null) nmsItem.a(Utils.rgbComp(name));
         if (!lore.isEmpty()) {

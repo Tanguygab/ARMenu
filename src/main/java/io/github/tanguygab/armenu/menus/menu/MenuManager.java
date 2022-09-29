@@ -1,7 +1,5 @@
 package io.github.tanguygab.armenu.menus.menu;
 
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.mojang.brigadier.tree.RootCommandNode;
 import io.github.tanguygab.armenu.ARMenu;
 import io.github.tanguygab.armenu.commands.CreateCmd;
 import io.github.tanguygab.armenu.menus.item.ClickType;
@@ -12,13 +10,19 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.features.layout.skin.SkinManager;
-import net.minecraft.commands.ICompletionProvider;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.world.inventory.InventoryClickType;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.command.defaults.BukkitCommand;
+import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
+import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.*;
@@ -32,12 +36,14 @@ public class MenuManager extends TabFeature {
     public Map<TabPlayer, CreateCmd> creators = new HashMap<>();
     public SkinManager skins;
 
+    private List<Command> commandsToRemove = new ArrayList<>();
+
     public MenuManager() {
         super("ARMenu","&2ARMenu&r");
         try {
             config = new YamlConfigurationFile(ARMenu.class.getClassLoader().getResourceAsStream("config.yml"), new File(ARMenu.get().getDataFolder(), "config.yml"));
             skins = new SkinManager("texture:f3d5e43de5d4177c4baf2f44161554473a3b0be5430998b5fcd826af943afe3");
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         load();
@@ -63,14 +69,37 @@ public class MenuManager extends TabFeature {
                 menus.put(name,menu);
                 commands.addAll(menu.getCommands());
             }
+            Field mapField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            mapField.setAccessible(true);
+            Map<String,Command> map = (Map<String, Command>) mapField.get(((CraftServer) Bukkit.getServer()).getCommandMap());
+            commands.forEach(cmd->{
+                if (map.containsKey(cmd)) return;
+                Command command = new BukkitCommand(cmd) {@Override public boolean execute(CommandSender sender, String commandLabel, String[] args) {return true;}};
+                map.put(cmd, command);
+                commandsToRemove.add(command);
+            });
 
             PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
             pm.registerServerPlaceholder("%armenu-menus-all%",-1,()->menus.size()+"");
             pm.registerPlayerPlaceholder("%menu%",1000,p->sessions.containsKey(p) ? sessions.get(p).getMenu().getName() : "");
             pm.registerPlayerPlaceholder("%menu-page%",1000,p->sessions.containsKey(p) ? sessions.get(p).getPage().getName() : "");
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void unload() {
+        CommandMap cmdMap = ((CraftServer) Bukkit.getServer()).getCommandMap();
+        try {
+            Field mapField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            mapField.setAccessible(true);
+            Map<String, Command> map = (Map<String, Command>) mapField.get(cmdMap);
+            //not working for some reasons, to tired to look into it
+            commandsToRemove.forEach(cmd -> map.remove(cmd.getName()));
+        } catch (Exception ignored) {}
+        Bukkit.getServer().getOnlinePlayers().forEach(Player::updateCommands);
+
     }
 
     public void newMenuSession(TabPlayer p, Menu menu) {
@@ -144,17 +173,6 @@ public class MenuManager extends TabFeature {
 
     @Override
     public void onPacketSend(TabPlayer p, Object packet) {
-        if (packet instanceof PacketPlayOutCommands cmds) {
-            try {
-                Field field = cmds.getClass().getDeclaredField("h");
-                field.setAccessible(true);
-                RootCommandNode<ICompletionProvider> rootcmd = (RootCommandNode<ICompletionProvider>) field.get(packet);
-                commands.forEach(cmd->rootcmd.addChild(new LiteralCommandNode<>(cmd,null,c -> true, null, s -> Collections.singleton(s.getSource()),false)));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         MenuSession session;
         if (packet instanceof PacketPlayOutSetSlot pickup && pickup.b() == 0 && (session = sessions.get(p)) != null) {
             session.pickedUpItem(pickup.c(),pickup.d());
