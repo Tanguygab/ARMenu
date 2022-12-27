@@ -27,5 +27,5 @@ dependencies {
     compileOnly 'net.luckperms:api:5.4'
     compileOnly 'com.mojang:authlib:3.3.39'
     compileOnly 'com.mojang:brigadier:1.0.18'
-    compileOnly files('../../dependencies/TAB-3.1.5.jar','../../dependencies/nms/nms-1.19.3.jar','../../dependencies/OraxenAPI.jar')
+    compileOnly files('../../dependencies/TAB-3.2.2.jar','../../dependencies/nms/nms-1.19.3.jar','../../dependencies/OraxenAPI.jar')
 }
