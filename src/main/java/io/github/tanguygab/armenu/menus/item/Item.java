@@ -309,7 +309,7 @@ public class Item {
         if (!customModelData.equals("")) {
             int modelData = Utils.parseInt(customModelData,-1);
             if (modelData != -1)
-                item.getItemMeta().setCustomModelData(modelData);
+                meta.setCustomModelData(modelData);
         }
 
         if (!enchants.isEmpty()) enchants.forEach((enchant,lvl)->{
