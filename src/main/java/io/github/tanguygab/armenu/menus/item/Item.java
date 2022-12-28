@@ -50,7 +50,7 @@ public class Item {
     protected Map<String,Map<String,String>> attributes;
     protected boolean isMovable;
 
-    private final static Pattern customModelDataPattern = Pattern.compile(",MODEL:(?<data>[0-9])");
+    private final static Pattern customModelDataPattern = Pattern.compile(",MODEL:(?<data>[0-9]+)");
     private final static Pattern potionEffectPattern = Pattern.compile(",EFFECT:(?<data>[a-zA-Z_]+)");
     private final static Pattern colorPattern = Pattern.compile(",COLOR:(?<data>([0-9]{1,3},){2}[0-9])");
 
